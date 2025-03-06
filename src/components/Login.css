@@ -1,0 +1,149 @@
+.login-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.login-left {
+  flex: 1;
+  background-color: #efb82a;
+  color: rgb(28, 27, 27);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-left h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.login-left p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+
+.read-more {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
+
+.login-form {
+  width: 80%;
+  max-width: 400px;
+}
+
+.login-form h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.login-form p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #efb82a;
+  color: rgb(23, 22, 22);
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.forgot-password {
+  text-align: center;
+}
+
+.forgot-password a {
+  color: #666;
+  text-decoration: none;
+}
+
+/* Add these media queries at the end of your existing CSS */
+
+@media screen and (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-left {
+    padding: 20px;
+    min-height: 200px;
+  }
+
+  .login-left h1 {
+    font-size: 2rem;
+  }
+
+  .login-right {
+    padding: 20px;
+  }
+
+  .login-form {
+    width: 90%;
+    padding: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-left h1 {
+    font-size: 1.8rem;
+  }
+
+  .login-form h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-group input {
+    padding: 10px;
+  }
+
+  .login-button {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-height: 600px) {
+  .login-left {
+    padding: 15px;
+  }
+
+  .login-form {
+    margin: 10px 0;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+}
