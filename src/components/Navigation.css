@@ -1,14 +1,43 @@
 .nav-sidebar {
-  width: 250px;
-  height: 100vh;
-  background-color: #003366;
-  color: white;
   position: fixed;
   left: 0;
   top: 0;
+  height: 100vh;
+  width: 250px;
+  background-color: #003366;
+  color: white;
   transition: all 0.3s ease;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
+
+.nav-sidebar.collapsed {
+  width: 60px;
+  transform: none;  /* Remove the transform that was hiding the sidebar */
+}
+
+body {
+  margin: 0;
+  padding-left: 4px;
+  transition: padding-left 0.3s ease;
+}
+
+body.nav-collapsed {
+  padding-left: 60px;
+}
+
+.dashboard-main {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: all 0.3s ease;
+}
+
+.dashboard-main.nav-collapsed {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
 .submenu {
   background-color: rgba(0, 0, 0, 0.2);
   margin-left: 20px;
@@ -211,4 +240,29 @@
   .nav-logout-btn {
     padding: 10px;
   }
+}
+.nav-sidebar.collapsed {
+  width: 60px;
+}
+
+.dashboard-main {
+  margin-left: 254px;  /* 250px + 4px */
+  width: calc(100% - 254px);
+  transition: all 0.3s ease;
+  padding: 20px;
+}
+
+.nav-sidebar.collapsed + .dashboard-main {
+  margin-left: 64px;  /* 60px + 4px */
+  width: calc(100% - 64px);
+}
+
+/* Remove body padding rules and keep basic reset */
+body {
+  margin: 0;
+  padding-left: 0;
+}
+
+body.nav-collapsed {
+  padding-left: 0;
 }

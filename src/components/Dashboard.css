@@ -7,10 +7,11 @@
 
 .dashboard-main {
   flex: 1;
-  margin-left: 250px;
-  padding: 20px;
+  margin-left: 4px;
+  padding: 4px;
   transition: all 0.3s ease;
-  width: calc(100% - 250px);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .dashboard-main.nav-collapsed {

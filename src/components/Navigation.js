@@ -27,16 +27,34 @@ const Navigation = ({ onMenuSelect }) => {
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
     e.stopPropagation();
     setIsOpen(false);
+    if (submenuItem.id === 'add-vehicle') {
+      navigate('/dashboard/vehicles/add');
+    } else if (submenuItem.id === 'vehicle-list') {
+      navigate('/dashboard/vehicles/list');
+    } else {
+      navigate(`/dashboard/vehicles/${submenuItem.id}`);
+    }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
   
   const handleMenuClick = (menuItem) => {
     setIsOpen(false);
+    if (menuItem.id === 'overview') {
+      navigate('/dashboard');
+    } else if (menuItem.id === 'vehicles') {
+      navigate('/dashboard/vehicles/list');
+    }
     onMenuSelect(menuItem, true);
   };
   
   const handleLogout = () => {
     navigate('/');
+  };
+  
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+    // Trigger layout adjustment
+    document.body.style.paddingLeft = !isOpen ? '250px' : '60px';
   };
   
   return (
@@ -47,7 +65,7 @@ const Navigation = ({ onMenuSelect }) => {
             <img src="/logo.jpeg" alt="Company Logo" className="company-logo" />
             <h3 className={!isOpen ? 'hidden' : ''}>Fleet Management</h3>
           </div>
-          <button className="toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+          <button className="toggle-btn" onClick={handleToggle}>
             <i className={`fas ${isOpen ? 'fa-chevron-left' : 'fa-chevron-right'}`}></i>
           </button>
         </div>

@@ -1,0 +1,46 @@
+.overview-container {
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.overview-container h2 {
+  margin-bottom: 24px;
+  color: #003366;
+  font-size: 24px;
+}
+
+.stats-cards {
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.stat-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.chart-card, .table-card {
+  height: 100%;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dashboard-charts {
+  width: 100%;
+}
+
+.dashboard-charts .ant-card-head-title {
+  color: #003366;
+}
+
+@media screen and (max-width: 768px) {
+  .overview-container {
+    padding: 16px;
+  }
+  
+  .overview-container h2 {
+    font-size: 20px;
+  }
+}
