@@ -1,52 +1,163 @@
 import React from 'react';
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Form, Input, Select, Row, Col } from 'antd';
 import './AddVehicle.css';
 
-const AddVehicle = () => {
+const AddVehicle = ({ onSuccess }) => {
   const [form] = Form.useForm();
+
+  const vehicleTypes = ['Sedan', 'SUV', 'Van', 'Truck', 'Bus'];
+  const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
+  const statusOptions = ['Active', 'Maintenance', 'Out of Service'];
 
   const onFinish = (values) => {
     console.log('Form values:', values);
+    if (onSuccess) {
+      form.resetFields();
+      onSuccess();
+    }
   };
 
   return (
     <div className="add-vehicle-container">
-      <div className="add-vehicle-header">
-        <h2>Add New Vehicle</h2>
-      </div>
+      {!onSuccess && ( // Only show header in standalone mode
+        <div className="add-vehicle-header">
+          <h2>Add New Vehicle</h2>
+        </div>
+      )}
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
         className="add-vehicle-form"
       >
-        <Form.Item
-          name="licensePlate"
-          label="License Plate Number"
-          rules={[{ required: true, pattern: /^[A-Z]{2}-[A-Z]{2}-[A-Z]{2}-\d{4}$/, message: 'Please enter valid format (XX-XX-XX-XXXX)' }]}
-        >
-          <Input placeholder="XX-XX-XX-XXXX" />
-        </Form.Item>
+        <Row gutter={24}>
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="licensePlate"
+              label="License Plate"
+              rules={[{ required: true, pattern: /^[A-Z]{2}-[A-Z]{2}-[A-Z]{2}-\d{4}$/, message: 'Please enter valid format (XX-XX-XX-XXXX)' }]}
+            >
+              <Input placeholder="XX-XX-XX-XXXX" />
+            </Form.Item>
+          </Col>
 
-        <Form.Item
-          name="make"
-          label="Make"
-          rules={[{ required: true }]}
-        >
-          <Select placeholder="Select manufacturer">
-            <Select.Option value="TATA">TATA</Select.Option>
-            <Select.Option value="MAHINDRA">MAHINDRA</Select.Option>
-            <Select.Option value="Toyota">Toyota</Select.Option>
-            <Select.Option value="Ford">Ford</Select.Option>
-          </Select>
-        </Form.Item>
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="make"
+              label="Make"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Select manufacturer">
+                <Select.Option value="TATA">TATA</Select.Option>
+                <Select.Option value="MAHINDRA">MAHINDRA</Select.Option>
+                <Select.Option value="Toyota">Toyota</Select.Option>
+                <Select.Option value="Ford">Ford</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
 
-        {/* Add other form fields here */}
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="model"
+              label="Model"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter model" />
+            </Form.Item>
+          </Col>
 
-        <Form.Item>
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="year"
+              label="Year"
+              rules={[{ required: true }]}
+            >
+              <Input type="number" placeholder="Enter year" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="color"
+              label="Color"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter color" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="vehicleType"
+              label="Vehicle Type"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Select vehicle type">
+                {vehicleTypes.map(type => (
+                  <Select.Option key={type} value={type}>{type}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="fuelType"
+              label="Fuel Type"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Select fuel type">
+                {fuelTypes.map(type => (
+                  <Select.Option key={type} value={type}>{type}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="engineNumber"
+              label="Engine Number"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter engine number" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="chassisNumber"
+              label="Chassis Number"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter chassis number" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="status"
+              label="Status"
+              rules={[{ required: true }]}
+            >
+              <Select placeholder="Select status">
+                {statusOptions.map(status => (
+                  <Select.Option key={status} value={status}>{status}</Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item className="form-actions">
           <Button type="primary" htmlType="submit">
             Add Vehicle
           </Button>
+          {onSuccess && (
+            <Button onClick={() => onSuccess()} style={{ marginLeft: 8 }}>
+              Cancel
+            </Button>
+          )}
         </Form.Item>
       </Form>
     </div>

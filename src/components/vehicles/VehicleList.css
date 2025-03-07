@@ -1,5 +1,8 @@
 .vehicle-list-container {
-  padding: 4px;
+  padding: 24px;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .vehicle-list-header {
@@ -12,8 +15,18 @@
 .vehicle-list-header h2 {
   margin: 0;
   color: #003366;
+  font-size: 24px;
 }
 
+@media screen and (max-width: 768px) {
+  .vehicle-list-container {
+    padding: 16px;
+  }
+  
+  .vehicle-list-header {
+    margin-bottom: 16px;
+  }
+}
 .ant-table-wrapper {
   background: white;
   border-radius: 8px;

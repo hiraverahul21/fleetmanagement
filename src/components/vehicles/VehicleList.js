@@ -1,131 +1,60 @@
 import React, { useState } from 'react';
-import { Switch, Button, Table } from 'antd';
-import { EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Table, Modal,Space } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import AddVehicle from './AddVehicle';
 import './VehicleList.css';
 
 const VehicleList = () => {
-  const [vehicles, setVehicles] = useState([
-    {
-      id: 1,
-      licensePlate: 'KA-01-AB-1234',
-      make: 'TATA',
-      model: 'Nexon',
-      year: '2023',
-      color: 'White',
-      vehicleType: 'SUV',
-      fuelType: 'Petrol',
-      engineNumber: 'ENG123456',
-      chassisNumber: 'CHS123456',
-      isActive: true,
-    },
-    // Add more sample data as needed
-  ]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const columns = [
-    {
-      title: 'License Plate',
-      dataIndex: 'licensePlate',
-      key: 'licensePlate',
-    },
-    {
-      title: 'Make',
-      dataIndex: 'make',
-      key: 'make',
-    },
-    {
-      title: 'Model',
-      dataIndex: 'model',
-      key: 'model',
-    },
-    {
-      title: 'Year',
-      dataIndex: 'year',
-      key: 'year',
-    },
-    {
-      title: 'Color',
-      dataIndex: 'color',
-      key: 'color',
-    },
-    {
-      title: 'Vehicle Type',
-      dataIndex: 'vehicleType',
-      key: 'vehicleType',
-    },
-    {
-      title: 'Fuel Type',
-      dataIndex: 'fuelType',
-      key: 'fuelType',
-    },
-    {
-      title: 'Engine Number',
-      dataIndex: 'engineNumber',
-      key: 'engineNumber',
-    },
-    {
-      title: 'Chassis Number',
-      dataIndex: 'chassisNumber',
-      key: 'chassisNumber',
-    },
-    {
-      title: 'Status',
-      key: 'isActive',
-      render: (_, record) => (
-        <Switch
-          checked={record.isActive}
-          onChange={(checked) => handleStatusChange(record.id, checked)}
-        />
-      ),
-    },
+    { title: 'License Plate', dataIndex: 'licensePlate', key: 'licensePlate' },
+    { title: 'Make', dataIndex: 'make', key: 'make' },
+    { title: 'Model', dataIndex: 'model', key: 'model' },
+    { title: 'Year', dataIndex: 'year', key: 'year' },
+    { title: 'Color', dataIndex: 'color', key: 'color' },
+    { title: 'Vehicle Type', dataIndex: 'vehicleType', key: 'vehicleType' },
+    { title: 'Fuel Type', dataIndex: 'fuelType', key: 'fuelType' },
+    { title: 'Status', dataIndex: 'status', key: 'status' },
     {
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(record)}
-        >
-          Edit
-        </Button>
+        <Space>
+          <Button type="link">Edit</Button>
+          <Button type="link" danger>Delete</Button>
+        </Space>
       ),
     },
   ];
 
-  const handleStatusChange = (id, status) => {
-    setVehicles(vehicles.map(vehicle =>
-      vehicle.id === id ? { ...vehicle, isActive: status } : vehicle
-    ));
-  };
-
-  const handleEdit = (vehicle) => {
-    // Handle edit action
-    console.log('Edit vehicle:', vehicle);
-  };
-
-  const handleAddVehicle = () => {
-    // Handle add vehicle action
-    console.log('Add new vehicle');
-  };
+  const data = []; // You'll populate this with your vehicle data
 
   return (
     <div className="vehicle-list-container">
       <div className="vehicle-list-header">
         <h2>Vehicle List</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleAddVehicle}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
           Add Vehicle
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={vehicles}
-        rowKey="id"
+
+      <Table 
+        columns={columns} 
+        dataSource={data}
+        rowKey="licensePlate"
         scroll={{ x: true }}
       />
+
+      <Modal
+        title="Add New Vehicle"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        width={1000}
+        footer={null}
+      >
+        <AddVehicle onSuccess={() => setIsModalVisible(false)} />
+      </Modal>
     </div>
   );
 };
