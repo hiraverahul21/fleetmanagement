@@ -1,11 +1,26 @@
-import React, { useState } from 'react';
-import { Button, Table, Modal,Space } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Button, Table, Modal, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import AddVehicle from './AddVehicle';
 import './VehicleList.css';
 
 const VehicleList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [vehicles, setVehicles] = useState([]);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/vehicles');
+      const data = await response.json();
+      setVehicles(data);
+    } catch (error) {
+      console.error('Error fetching vehicles:', error);
+    }
+  };
 
   const columns = [
     { title: 'License Plate', dataIndex: 'licensePlate', key: 'licensePlate' },
@@ -28,8 +43,6 @@ const VehicleList = () => {
     },
   ];
 
-  const data = []; // You'll populate this with your vehicle data
-
   return (
     <div className="vehicle-list-container">
       <div className="vehicle-list-header">
@@ -41,7 +54,7 @@ const VehicleList = () => {
 
       <Table 
         columns={columns} 
-        dataSource={data}
+        dataSource={vehicles}
         rowKey="licensePlate"
         scroll={{ x: true }}
       />
@@ -53,7 +66,10 @@ const VehicleList = () => {
         width={1000}
         footer={null}
       >
-        <AddVehicle onSuccess={() => setIsModalVisible(false)} />
+        <AddVehicle onSuccess={() => {
+          setIsModalVisible(false);
+          fetchVehicles(); // Refresh the list after adding
+        }} />
       </Modal>
     </div>
   );

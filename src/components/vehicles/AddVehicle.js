@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Form, Input, Select, Row, Col } from 'antd';
 import './AddVehicle.css';
+import { message } from 'antd';
 
 const AddVehicle = ({ onSuccess }) => {
   const [form] = Form.useForm();
@@ -9,11 +10,26 @@ const AddVehicle = ({ onSuccess }) => {
   const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
   const statusOptions = ['Active', 'Maintenance', 'Out of Service'];
 
-  const onFinish = (values) => {
-    console.log('Form values:', values);
-    if (onSuccess) {
-      form.resetFields();
-      onSuccess();
+  const onFinish = async (values) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/vehicles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+      
+      if (response.ok) {
+        message.success('Vehicle added successfully');
+        form.resetFields();
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    } catch (error) {
+      message.error('Error adding vehicle');
+      console.error('Error:', error);
     }
   };
 
@@ -35,9 +51,13 @@ const AddVehicle = ({ onSuccess }) => {
             <Form.Item
               name="licensePlate"
               label="License Plate"
-              rules={[{ required: true, pattern: /^[A-Z]{2}-[A-Z]{2}-[A-Z]{2}-\d{4}$/, message: 'Please enter valid format (XX-XX-XX-XXXX)' }]}
+              rules={[{ 
+                required: true, 
+                pattern: /^[A-Z]{2}-(?:\d{1,3})-[A-Z]{2}-\d{4}$/, 
+                message: 'Please enter valid format (e.g., MH-14-FG-0711, MH-140-FG-0711)' 
+              }]}
             >
-              <Input placeholder="XX-XX-XX-XXXX" />
+              <Input placeholder="MH-14-FG-0711" />
             </Form.Item>
           </Col>
 

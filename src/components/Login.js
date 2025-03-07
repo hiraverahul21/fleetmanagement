@@ -9,12 +9,28 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email === 'rahul@gmail.com' && password === 'rahul123') {
-      navigate('/dashboard');
-    } else {
-      setError('Invalid credentials');
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/dashboard');
+      } else {
+        setError(data.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      setError('Server error. Please try again later.');
+      console.error('Login error:', error);
     }
   };
 
