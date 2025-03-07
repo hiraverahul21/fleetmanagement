@@ -2,6 +2,7 @@
   display: flex;
   min-height: 100vh;
   background-color: #f5f6fa;
+  font-size: 16px;
 }
 
 .dashboard-main {
@@ -16,12 +17,13 @@
   margin-left: 60px;
   width: calc(100% - 60px);
 }
+
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  padding: 20px;
+  margin-bottom: clamp(20px, 3vh, 30px);
+  padding: clamp(15px, 2vw, 20px);
   background-color: white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -29,25 +31,87 @@
 .dashboard-header h1 {
   color: #003366;
   margin: 0;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
 }
 
 .logout-btn {
-  padding: 10px 20px;
+  padding: clamp(8px, 1.5vw, 10px) clamp(15px, 2vw, 20px);
   background-color: #003366;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 .dashboard-content {
-  padding: 20px;
+  padding: clamp(15px, 2vw, 20px);
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.dashboard-content h2 {
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  margin-bottom: clamp(15px, 2vh, 20px);
+}
+
+/* Tablet Devices */
+@media screen and (max-width: 1024px) {
+  .dashboard-main {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+
+  .dashboard-main.nav-collapsed {
+    margin-left: 50px;
+    width: calc(100% - 50px);
+  }
+}
+
+/* Mobile Devices */
 @media screen and (max-width: 768px) {
-  .main-content {
+  .dashboard-container {
+    font-size: 14px;
+  }
+
+  .dashboard-main {
     margin-left: 0;
+    width: 100%;
+    padding: 15px;
+  }
+
+  .dashboard-main.nav-collapsed {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .dashboard-content {
+    padding: 15px;
+  }
+}
+
+/* Small Mobile Devices */
+@media screen and (max-width: 480px) {
+  .dashboard-container {
+    font-size: 13px;
+  }
+
+  .dashboard-main {
+    padding: 10px;
+  }
+
+  .dashboard-header {
+    padding: 10px;
+  }
+
+  .dashboard-content {
+    padding: 10px;
   }
 }

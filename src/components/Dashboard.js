@@ -17,9 +17,6 @@ const Dashboard = () => {
       <div className={`dashboard-main ${isNavCollapsed ? 'nav-collapsed' : ''}`}>
         <div className="dashboard-header">
           <h1>{currentScreen.label}</h1>
-          <button className="logout-btn" onClick={() => window.location.href = '/'}>
-            Logout
-          </button>
         </div>
         <div className="dashboard-content">
           <h2>Welcome to {currentScreen.label}</h2>
