@@ -1,0 +1,37 @@
+.dashboard-container {
+  display: flex;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 250px;
+}
+
+.content-area {
+  padding: 80px 20px 20px;
+  min-height: 100vh;
+  background-color: #f5f6fa;
+}
+
+.page-title {
+  margin-bottom: 20px;
+  color: #003366;
+  font-size: 24px;
+}
+.main-content.nav-hidden {
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+@media screen and (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .content-area {
+    padding-top: 60px;
+  }
+}

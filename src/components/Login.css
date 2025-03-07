@@ -33,7 +33,11 @@
   cursor: pointer;
   width: fit-content;
 }
-
+.error-message {
+  color: red;
+  margin-bottom: 10px;
+  text-align: center;
+}
 .login-right {
   flex: 1;
   display: flex;

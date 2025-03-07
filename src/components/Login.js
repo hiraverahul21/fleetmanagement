@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import './Login.css';
 import logo from '../assets/logo.jpeg';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your login logic here
+    if (email === 'rahul@gmail.com' && password === 'rahul123') {
+      navigate('/dashboard');
+    } else {
+      setError('Invalid credentials');
+    }
   };
 
   return (
@@ -24,6 +31,7 @@ const Login = () => {
           <h2>Hello Again!</h2>
           <p>Welcome Back</p>
           <form onSubmit={handleSubmit}>
+            {error && <div className="error-message">{error}</div>}
             <div className="form-group">
               <input
                 type="email"
