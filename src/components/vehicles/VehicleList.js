@@ -58,6 +58,19 @@ const VehicleList = () => {
       ),
     },
   ];
+  const getRowClassName = (record) => {
+    switch (record.status) {
+      case 'Active':
+        return 'active-row';
+      case 'Out of Service':
+        return 'out-of-service-row';
+      case 'Maintenance':
+        return 'maintenance-row';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="vehicle-list-container">
       <div className="vehicle-list-header">
@@ -72,6 +85,7 @@ const VehicleList = () => {
         dataSource={vehicles}
         rowKey="licensePlate"
         scroll={{ x: true }}
+        rowClassName={getRowClassName}
       />
 
       <Modal

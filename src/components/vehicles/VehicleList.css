@@ -41,7 +41,30 @@
 .ant-switch-checked {
   background-color: #52c41a;
 }
+.active-row {
+  background-color: #f0fdf0 !important;
+}
 
+.out-of-service-row {
+  background-color: #fff1f0 !important;
+}
+
+.maintenance-row {
+  background-color: #fff7e6 !important;
+}
+
+/* Hover effects */
+.active-row:hover td {
+  background-color: #e6ffe6 !important;
+}
+
+.out-of-service-row:hover td {
+  background-color: #ffe7e6 !important;
+}
+
+.maintenance-row:hover td {
+  background-color: #fff1cc !important;
+}
 @media screen and (max-width: 768px) {
   .vehicle-list-container {
     padding: 4px;
