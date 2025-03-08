@@ -28,6 +28,17 @@ app.post('/api/vehicles', async (req, res) => {
   }
 });
 
+app.put('/api/vehicles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vehicle = req.body;
+    const [result] = await db.query('UPDATE vehicles SET ? WHERE id = ?', [vehicle, id]);
+    res.json({ id, ...vehicle });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Login route
 app.post('/api/login', async (req, res) => {
   try {

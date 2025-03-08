@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Form, Input, Select, Row, Col } from 'antd';
 import './AddVehicle.css';
 import { message } from 'antd';
 
-const AddVehicle = ({ onSuccess }) => {
+const AddVehicle = ({ onSuccess, initialValues }) => {
   const [form] = Form.useForm();
 
   const vehicleTypes = ['Sedan', 'SUV', 'Van', 'Truck', 'Bus'];
   const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
   const statusOptions = ['Active', 'Maintenance', 'Out of Service'];
 
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
+
   const onFinish = async (values) => {
     try {
-      const response = await fetch('http://localhost:5000/api/vehicles', {
-        method: 'POST',
+      const url = initialValues 
+        ? `http://localhost:5000/api/vehicles/${initialValues.id}`
+        : 'http://localhost:5000/api/vehicles';
+  
+      const method = initialValues ? 'PUT' : 'POST';
+  
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -21,18 +33,18 @@ const AddVehicle = ({ onSuccess }) => {
       });
       
       if (response.ok) {
-        message.success('Vehicle added successfully');
+        message.success(`Vehicle ${initialValues ? 'updated' : 'added'} successfully`);
         form.resetFields();
         if (onSuccess) {
           onSuccess();
         }
       }
     } catch (error) {
-      message.error('Error adding vehicle');
+      message.error(`Error ${initialValues ? 'updating' : 'adding'} vehicle`);
       console.error('Error:', error);
     }
   };
-
+  
   return (
     <div className="add-vehicle-container">
       {!onSuccess && ( // Only show header in standalone mode

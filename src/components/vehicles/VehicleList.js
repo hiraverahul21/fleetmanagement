@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Table, Modal, Space } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import AddVehicle from './AddVehicle';
 import './VehicleList.css';
 
 const VehicleList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [vehicles, setVehicles] = useState([]);
+  const [editingVehicle, setEditingVehicle] = useState(null);
 
   useEffect(() => {
     fetchVehicles();
@@ -21,7 +22,14 @@ const VehicleList = () => {
       console.error('Error fetching vehicles:', error);
     }
   };
-
+  const handleEdit = (record) => {
+    setEditingVehicle(record);
+    setIsModalVisible(true);
+  };
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setEditingVehicle(null);
+  };
   const columns = [
     { title: 'License Plate', dataIndex: 'licensePlate', key: 'licensePlate' },
     { title: 'Make', dataIndex: 'make', key: 'make' },
@@ -36,13 +44,20 @@ const VehicleList = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Button type="link">Edit</Button>
-          <Button type="link" danger>Delete</Button>
+          <Button 
+            type="primary" 
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          >
+            Edit
+          </Button>
+          <Button type="primary" danger icon={<DeleteOutlined />}>
+            Delete
+          </Button>
         </Space>
       ),
     },
   ];
-
   return (
     <div className="vehicle-list-container">
       <div className="vehicle-list-header">
@@ -60,16 +75,19 @@ const VehicleList = () => {
       />
 
       <Modal
-        title="Add New Vehicle"
+        title={editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}
         open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={handleModalClose}
         width={1000}
         footer={null}
       >
-        <AddVehicle onSuccess={() => {
-          setIsModalVisible(false);
-          fetchVehicles(); // Refresh the list after adding
-        }} />
+        <AddVehicle 
+          onSuccess={() => {
+            handleModalClose();
+            fetchVehicles();
+          }}
+          initialValues={editingVehicle}
+        />
       </Modal>
     </div>
   );
