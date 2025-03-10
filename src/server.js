@@ -41,29 +41,69 @@ app.put('/api/vehicles/:id', async (req, res) => {
 
 // Partner routes
 app.post('/api/partners', async (req, res) => {
-  const connection = await db.getConnection();
+  let connection;
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
+    
+    // Map camelCase request fields to snake_case database fields
     const {
-      name, contact_person, email, phone, status,
-      account_name, bank_name, bank_branch, ifsc_code, payment_terms
+      name,
+      contactPerson: contact_person,
+      email,
+      phone,
+      status,
+      accountName: account_name,
+      bankName: bank_name,
+      bankBranch: bank_branch,
+      ifscCode: ifsc_code,
+      paymentTerms: payment_terms
     } = req.body;
 
-    // Insert into partners table
-    const [partnerResult] = await connection.execute(
-      `INSERT INTO partners (name, contact_person, email, phone, status) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [name, contact_person, email, phone, status]
+    // Log the received data for debugging
+    console.log('Received partner data:', req.body);
+
+    // Check for empty strings or null values
+    if (!name || !contact_person || !email || !phone || 
+        name.trim() === '' || contact_person.trim() === '' || 
+        email.trim() === '' || phone.trim() === '') {
+      throw new Error('Name, Contact Person, Email, and Phone are required fields and cannot be empty');
+    }
+
+    // Validate status enum
+    const validStatus = ['active', 'inactive'];
+    const partnerStatus = status?.toLowerCase() || 'active';
+    if (!validStatus.includes(partnerStatus)) {
+      throw new Error('Status must be either "active" or "inactive"');
+    }
+
+    // Insert into partners table with trimmed values
+    const [partnerResult] = await connection.query(
+      'INSERT INTO partners (name, contact_person, email, phone, status) VALUES (?, ?, ?, ?, ?)',
+      [
+        name.trim(),
+        contact_person.trim(),
+        email.trim(),
+        phone.trim(),
+        partnerStatus
+      ]
     );
 
     const partnerId = partnerResult.insertId;
 
-    // Insert into partner_bank_details table
-    await connection.execute(
+    // Insert into partner_bank_details table with null checks
+    await connection.query(
       `INSERT INTO partner_bank_details 
        (partner_id, account_name, bank_name, bank_branch, ifsc_code, payment_terms) 
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [partnerId, account_name, bank_name, bank_branch, ifsc_code, payment_terms]
+      [
+        partnerId,
+        (account_name && account_name.trim()) || null,
+        (bank_name && bank_name.trim()) || null,
+        (bank_branch && bank_branch.trim()) || null,
+        (ifsc_code && ifsc_code.trim()) || null,
+        (payment_terms && payment_terms.trim()) || null
+      ]
     );
 
     await connection.commit();
@@ -73,22 +113,28 @@ app.post('/api/partners', async (req, res) => {
       partnerId 
     });
   } catch (error) {
-    await connection.rollback();
+    if (connection) {
+      await connection.rollback();
+    }
     console.error('Error adding partner:', error);
-    res.status(500).json({ 
+    res.status(400).json({ 
       success: false, 
-      message: 'Failed to add partner', 
-      error: error.message 
+      message: error.message || 'Failed to add partner',
+      details: error.sqlMessage || error.message
     });
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
 app.put('/api/partners/:id', async (req, res) => {
-  const connection = await db.getConnection();
+  let connection;
   try {
+    connection = await db.getConnection();
     await connection.beginTransaction();
+    
     const { id } = req.params;
     const {
       name, contact_person, email, phone, status,
@@ -96,62 +142,46 @@ app.put('/api/partners/:id', async (req, res) => {
     } = req.body;
 
     // Update partners table
-    const [updatePartner] = await connection.execute(
-      `UPDATE partners 
-       SET name = ?, contact_person = ?, email = ?, phone = ?, status = ?
-       WHERE id = ?`,
+    const [updatePartner] = await connection.query(
+      'UPDATE partners SET name = ?, contact_person = ?, email = ?, phone = ?, status = ? WHERE id = ?',
       [name, contact_person, email, phone, status, id]
     );
 
     if (updatePartner.affectedRows === 0) {
       await connection.rollback();
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Partner not found' 
-      });
+      return res.status(404).json({ success: false, message: 'Partner not found' });
     }
 
-    // Check if bank details exist
-    const [bankDetails] = await connection.execute(
+    // Update or insert bank details
+    const [bankDetails] = await connection.query(
       'SELECT id FROM partner_bank_details WHERE partner_id = ?',
       [id]
     );
 
     if (bankDetails.length > 0) {
-      // Update existing bank details
-      await connection.execute(
-        `UPDATE partner_bank_details 
-         SET account_name = ?, bank_name = ?, bank_branch = ?, 
-             ifsc_code = ?, payment_terms = ?
-         WHERE partner_id = ?`,
+      await connection.query(
+        'UPDATE partner_bank_details SET account_name = ?, bank_name = ?, bank_branch = ?, ifsc_code = ?, payment_terms = ? WHERE partner_id = ?',
         [account_name, bank_name, bank_branch, ifsc_code, payment_terms, id]
       );
     } else {
-      // Insert new bank details
-      await connection.execute(
-        `INSERT INTO partner_bank_details 
-         (partner_id, account_name, bank_name, bank_branch, ifsc_code, payment_terms)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+      await connection.query(
+        'INSERT INTO partner_bank_details (partner_id, account_name, bank_name, bank_branch, ifsc_code, payment_terms) VALUES (?, ?, ?, ?, ?, ?)',
         [id, account_name, bank_name, bank_branch, ifsc_code, payment_terms]
       );
     }
 
     await connection.commit();
-    res.json({ 
-      success: true,
-      message: 'Partner updated successfully',
-      id: id
-    });
+    res.json({ success: true, message: 'Partner updated successfully', id });
   } catch (error) {
-    await connection.rollback();
+    if (connection) {
+      await connection.rollback();
+    }
     console.error('Update error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update partner', 
-      error: error.message 
-    });
+    res.status(500).json({ success: false, message: 'Failed to update partner', error: error.message });
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
