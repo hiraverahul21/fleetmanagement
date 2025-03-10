@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Form, Input, Button, Select, Row, Col, Card, message } from 'antd';
-import { addPartner, updatePartner } from '../../services/partnerService';
+import axios from 'axios';
 import './AddPartner.css';
+
+const API_URL = 'http://localhost:5000/api';
 
 const AddPartner = ({ onSuccess, initialValues }) => {
   const [form] = Form.useForm();
@@ -27,24 +29,10 @@ const AddPartner = ({ onSuccess, initialValues }) => {
 
   const onFinish = async (values) => {
     try {
-      // Map form field names back to database field names
-      const mappedValues = {
-        name: values.name,
-        contact_person: values.contactPerson,
-        email: values.email,
-        phone: values.phone,
-        status: values.status,
-        account_name: values.accountName,
-        bank_name: values.bankName,
-        bank_branch: values.bankBranch,
-        ifsc_code: values.ifscCode,
-        payment_terms: values.paymentTerms
-      };
-
-      if (initialValues) {
-        await updatePartner(initialValues.id, mappedValues);
+      if (initialValues?.id) {
+        await axios.put(`${API_URL}/partners/${initialValues.id}`, values);
       } else {
-        await addPartner(mappedValues);
+        await axios.post(`${API_URL}/partners`, values);
       }
       if (onSuccess) {
         onSuccess();

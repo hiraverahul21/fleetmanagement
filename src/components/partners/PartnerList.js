@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Space, Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { getPartners } from '../../services/partnerService';
+import axios from 'axios';
 import AddPartner from './AddPartner';
 import './PartnerList.css';
+
+const API_URL = 'http://localhost:5000/api';
 
 const PartnerList = () => {
   const [partners, setPartners] = useState([]);
@@ -14,8 +16,8 @@ const PartnerList = () => {
   const fetchPartners = async () => {
     try {
       setLoading(true);
-      const data = await getPartners();
-      setPartners(data);
+      const response = await axios.get(`${API_URL}/partners`);
+      setPartners(response.data);
     } catch (error) {
       message.error('Failed to fetch partners');
       console.error('Error:', error);

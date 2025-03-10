@@ -1,10 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form, Input, Select, Row, Col } from 'antd';
 import './AddVehicle.css';
 import { message } from 'antd';
 
 const AddVehicle = ({ onSuccess, initialValues }) => {
   const [form] = Form.useForm();
+  const [partners, setPartners] = useState([]); // Add partners state
+
+  // Add fetchPartners function
+  const fetchPartners = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/partners/names');
+      const data = await response.json();
+      setPartners(data);
+    } catch (error) {
+      message.error('Failed to fetch partners');
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPartners(); // Fetch partners when component mounts
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, form]);
 
   const vehicleTypes = ['Sedan', 'SUV', 'Van', 'Truck', 'Bus'];
   const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
@@ -59,6 +79,23 @@ const AddVehicle = ({ onSuccess, initialValues }) => {
         className="add-vehicle-form"
       >
         <Row gutter={24}>
+          {/* Add Partner dropdown as first field */}
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="partner_id"
+              label="Partner"
+              rules={[{ required: true, message: 'Please select a partner' }]}
+            >
+              <Select placeholder="Select partner">
+                {partners.map(partner => (
+                  <Select.Option key={partner.partnerId} value={partner.partnerId}>
+                    {partner.partnerName}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
           <Col xs={24} sm={12} lg={8}>
             <Form.Item
               name="licensePlate"
