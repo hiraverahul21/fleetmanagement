@@ -21,28 +21,49 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'vehicle-status', label: 'Vehicle Status', icon: 'info-circle' }
       ]
     },
+    { 
+      id: 'partners', 
+      icon: 'handshake', 
+      label: 'Partners',
+      submenu: [
+        { id: 'add-partner', label: 'Add Partner', icon: 'plus' },
+        { id: 'partner-list', label: 'Partner List', icon: 'list' }
+      ]
+    },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
+  // Update handleSubmenuClick to handle partner routes
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
     e.stopPropagation();
     setIsOpen(false);
-    if (submenuItem.id === 'add-vehicle') {
-      navigate('/dashboard/vehicles/add');
-    } else if (submenuItem.id === 'vehicle-list') {
-      navigate('/dashboard/vehicles/list');
-    } else {
-      navigate(`/dashboard/vehicles/${submenuItem.id}`);
+    if (parentItem.id === 'vehicles') {
+      if (submenuItem.id === 'add-vehicle') {
+        navigate('/dashboard/vehicles/add');
+      } else if (submenuItem.id === 'vehicle-list') {
+        navigate('/dashboard/vehicles/list');
+      } else {
+        navigate(`/dashboard/vehicles/${submenuItem.id}`);
+      }
+    } else if (parentItem.id === 'partners') {
+      if (submenuItem.id === 'add-partner') {
+        navigate('/dashboard/partners/add');
+      } else if (submenuItem.id === 'partner-list') {
+        navigate('/dashboard/partners/list');
+      }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
   
+  // Update handleMenuClick to handle partner menu
   const handleMenuClick = (menuItem) => {
     setIsOpen(false);
     if (menuItem.id === 'overview') {
       navigate('/dashboard');
     } else if (menuItem.id === 'vehicles') {
       navigate('/dashboard/vehicles/list');
+    } else if (menuItem.id === 'partners') {
+      navigate('/dashboard/partners/list');
     }
     onMenuSelect(menuItem, true);
   };

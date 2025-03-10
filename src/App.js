@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 import VehicleList from './components/vehicles/VehicleList';
 import AddVehicle from './components/vehicles/AddVehicle';
 import Overview from './components/Overview';
+import PartnerList from './components/partners/PartnerList';
+import AddPartner from './components/partners/AddPartner';
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
           <Route index element={<Overview />} />
           <Route path="vehicles/add" element={<AddVehicle />} />
           <Route path="vehicles/list" element={<VehicleList />} />
+          <Route path="partners/add" element={<AddPartner />} />
+          <Route path="partners/list" element={<PartnerList />} />
         </Route>
       </Routes>
     </BrowserRouter>

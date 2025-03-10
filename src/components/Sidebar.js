@@ -9,7 +9,8 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: 'tachometer-alt', label: 'Dashboard' },
-    { path: '/vehicles', icon: 'car', label: 'Vehicles', hasSubmenu: true },
+    { path: '/dashboard/vehicles', icon: 'car', label: 'Vehicles', hasSubmenu: true },
+    { path: '/dashboard/partners', icon: 'handshake', label: 'Partners', hasSubmenu: true }, // Added Partners menu
     { path: '/equipment', icon: 'tools', label: 'Equipment' },
     { path: '/inspections', icon: 'clipboard-check', label: 'Inspections', hasSubmenu: true },
     { path: '/issues', icon: 'exclamation-triangle', label: 'Issues', hasSubmenu: true },
@@ -25,11 +26,16 @@ const Sidebar = () => {
   ];
 
   const handleMenuClick = (path) => {
-    setIsOpen(false);
-    document.querySelector('.sidebar').classList.add('collapsed');
-    setTimeout(() => {
+    if (path.includes('/dashboard/partners') || path.includes('/dashboard/vehicles')) {
+      // Don't collapse sidebar for items with submenus
       navigate(path);
-    }, 300); // Match this with your CSS transition time
+    } else {
+      setIsOpen(false);
+      document.querySelector('.sidebar').classList.add('collapsed');
+      setTimeout(() => {
+        navigate(path);
+      }, 300);
+    }
   };
   const toggleNav = () => {
     setIsOpen(!isOpen);
