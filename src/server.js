@@ -137,14 +137,51 @@ app.put('/api/partners/:id', async (req, res) => {
     
     const { id } = req.params;
     const {
-      name, contact_person, email, phone, status,
-      account_name, bank_name, bank_branch, ifsc_code, payment_terms
+      name,
+      contactPerson: contact_person,
+      email,
+      phone,
+      status,
+      accountName: account_name,
+      bankName: bank_name,
+      bankBranch: bank_branch,
+      ifscCode: ifsc_code,
+      paymentTerms: payment_terms
     } = req.body;
+
+    console.log('Received update data:', req.body); // Debug log
+
+    // Validate all required fields
+    const requiredFields = {
+      name,
+      contact_person,
+      email,
+      phone,
+      account_name,
+      bank_name,
+      bank_branch,
+      ifsc_code
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([_, value]) => !value || value.trim() === '')
+      .map(([field]) => field);
+
+    if (missingFields.length > 0) {
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+    }
 
     // Update partners table
     const [updatePartner] = await connection.query(
       'UPDATE partners SET name = ?, contact_person = ?, email = ?, phone = ?, status = ? WHERE id = ?',
-      [name, contact_person, email, phone, status, id]
+      [
+        name.trim(),
+        contact_person.trim(),
+        email.trim(),
+        phone.trim(),
+        status || 'active',
+        id
+      ]
     );
 
     if (updatePartner.affectedRows === 0) {
@@ -152,21 +189,42 @@ app.put('/api/partners/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Partner not found' });
     }
 
-    // Update or insert bank details
-    const [bankDetails] = await connection.query(
+    // Handle bank details
+    const [existingBank] = await connection.query(
       'SELECT id FROM partner_bank_details WHERE partner_id = ?',
       [id]
     );
 
-    if (bankDetails.length > 0) {
+    if (existingBank.length > 0) {
+      // Update existing bank details
       await connection.query(
-        'UPDATE partner_bank_details SET account_name = ?, bank_name = ?, bank_branch = ?, ifsc_code = ?, payment_terms = ? WHERE partner_id = ?',
-        [account_name, bank_name, bank_branch, ifsc_code, payment_terms, id]
+        `UPDATE partner_bank_details 
+         SET account_name = ?, bank_name = ?, bank_branch = ?, 
+             ifsc_code = ?, payment_terms = ?
+         WHERE partner_id = ?`,
+        [
+          account_name.trim(),
+          bank_name.trim(),
+          bank_branch.trim(),
+          ifsc_code.trim(),
+          payment_terms?.trim() || '',
+          id
+        ]
       );
     } else {
+      // Insert new bank details
       await connection.query(
-        'INSERT INTO partner_bank_details (partner_id, account_name, bank_name, bank_branch, ifsc_code, payment_terms) VALUES (?, ?, ?, ?, ?, ?)',
-        [id, account_name, bank_name, bank_branch, ifsc_code, payment_terms]
+        `INSERT INTO partner_bank_details 
+         (partner_id, account_name, bank_name, bank_branch, ifsc_code, payment_terms)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          account_name.trim(),
+          bank_name.trim(),
+          bank_branch.trim(),
+          ifsc_code.trim(),
+          payment_terms?.trim() || ''
+        ]
       );
     }
 
@@ -177,7 +235,10 @@ app.put('/api/partners/:id', async (req, res) => {
       await connection.rollback();
     }
     console.error('Update error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update partner', error: error.message });
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || 'Failed to update partner'
+    });
   } finally {
     if (connection) {
       connection.release();
