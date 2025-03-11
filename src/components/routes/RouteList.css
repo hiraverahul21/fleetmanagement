@@ -1,0 +1,14 @@
+.route-list-container {
+  padding: 24px;
+}
+
+.route-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.route-header h2 {
+  margin: 0;
+}

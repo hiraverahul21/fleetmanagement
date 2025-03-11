@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Navigation.css';
+import {
+  DashboardOutlined,
+  CarOutlined,
+  TeamOutlined,
+  BoxPlotOutlined,
+  EnvironmentOutlined
+} from '@ant-design/icons';
 
-// Temporarily use an online placeholder until you add your image
 const Navigation = ({ onMenuSelect }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
@@ -39,6 +45,15 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'package-list', label: 'Package List', icon: 'list' }
       ]
     },
+    { 
+      id: 'routes', 
+      icon: 'route', 
+      label: 'Routes',
+      submenu: [
+        { id: 'add-route', label: 'Add Route', icon: 'plus' },
+        { id: 'route-list', label: 'Route List', icon: 'list' }
+      ]
+    },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
@@ -66,13 +81,19 @@ const Navigation = ({ onMenuSelect }) => {
       } else if (submenuItem.id === 'package-list') {
         navigate('/dashboard/packages/list');
       }
+    } else if (parentItem.id === 'routes') {
+      if (submenuItem.id === 'add-route') {
+        navigate('/dashboard/routes/add');
+      } else if (submenuItem.id === 'route-list') {
+        navigate('/dashboard/routes/list');
+      }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
   
   // Update handleMenuClick to handle partner menu
+  // Update handleMenuClick to handle all menu items and maintain margin
   const handleMenuClick = (menuItem) => {
-    setIsOpen(false);
     if (menuItem.id === 'overview') {
       navigate('/dashboard');
     } else if (menuItem.id === 'vehicles') {
@@ -81,6 +102,8 @@ const Navigation = ({ onMenuSelect }) => {
       navigate('/dashboard/partners/list');
     } else if (menuItem.id === 'packages') {
       navigate('/dashboard/packages/list');
+    } else if (menuItem.id === 'routes') {
+      navigate('/dashboard/routes/list');
     }
     onMenuSelect(menuItem, true);
   };
@@ -91,8 +114,9 @@ const Navigation = ({ onMenuSelect }) => {
   
   const handleToggle = () => {
     setIsOpen(!isOpen);
-    // Trigger layout adjustment
+    // Update layout adjustment for all pages
     document.body.style.paddingLeft = !isOpen ? '250px' : '60px';
+    document.body.style.transition = 'padding-left 0.3s ease';
   };
   
   return (
