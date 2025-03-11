@@ -296,18 +296,75 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Add all package-related endpoints before app.listen()
+// Update the GET packages endpoint
 app.get('/api/packages', async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT p.*, c.name as company_name, s.name as supervisor_name, d.name as driver_name
+      SELECT 
+        p.*,
+        c.name as company_name,
+        s.name as supervisor_name,
+        d.name as driver_name,
+        v.licensePlate as vehicle_no
       FROM packages p
       LEFT JOIN companies c ON p.company_id = c.id
       LEFT JOIN staff s ON p.supervisor_id = s.id
       LEFT JOIN drivers d ON p.driver_id = d.id
+      LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
+      ORDER BY p.id DESC
     `);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Update the POST packages endpoint
+app.post('/api/packages', async (req, res) => {
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    const package = req.body;
+    const [result] = await connection.query('INSERT INTO packages SET ?', package);
+    
+    // Fetch the newly created package with related data
+    const [newPackage] = await connection.query(`
+      SELECT 
+        p.*,
+        c.name as company_name,
+        s.name as supervisor_name,
+        d.name as driver_name,
+        v.licensePlate as vehicle_no
+      FROM packages p
+      LEFT JOIN companies c ON p.company_id = c.id
+      LEFT JOIN staff s ON p.supervisor_id = s.id
+      LEFT JOIN drivers d ON p.driver_id = d.id
+      LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
+      WHERE p.id = ?
+    `, [result.insertId]);
+
+    await connection.commit();
+    res.status(201).json({ 
+      success: true,
+      message: 'Package added successfully',
+      data: newPackage[0]
+    });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Error adding package:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to add package',
+      error: error.message 
+    });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });
 
@@ -353,18 +410,6 @@ app.get('/api/partners/names', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Error fetching partner names:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Add package endpoint
-app.post('/api/packages', async (req, res) => {
-  try {
-    const package = req.body;
-    const [result] = await db.query('INSERT INTO packages SET ?', package);
-    res.status(201).json({ id: result.insertId, ...package });
-  } catch (error) {
-    console.error('Error adding package:', error);
     res.status(500).json({ error: error.message });
   }
 });
