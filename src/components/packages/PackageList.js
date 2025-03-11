@@ -44,8 +44,9 @@ const PackageList = () => {
     setShowModal(false);
   };
 
-  const handlePackageAdded = (newPackage) => {
-    setPackages([...packages, newPackage]);
+  const handlePackageAdded = async (newPackage) => {
+    await fetchData(); // Fetch fresh data after adding package
+    handleModalClose();
   };
 
   return (
