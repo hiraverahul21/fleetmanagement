@@ -16,28 +16,68 @@ const VehicleList = () => {
   const fetchVehicles = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/vehicles');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
-      setVehicles(data);
+      console.log('Raw vehicle data:', data);
+      
+      // Transform data to ensure all fields are present with proper casing
+      const processedData = data.map(vehicle => ({
+        ...vehicle,
+        year: vehicle.year || vehicle.Year || '-',
+        color: vehicle.color || vehicle.Color || '-',
+        fuelType: vehicle.fuelType || vehicle.FuelType || '-',
+        vehicleType: vehicle.vehicleType || vehicle.VehicleType || '-',
+        status: vehicle.status || vehicle.Status || 'Active'
+      }));
+      
+      setVehicles(processedData);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
     }
   };
+
   const handleEdit = (record) => {
     setEditingVehicle(record);
     setIsModalVisible(true);
   };
+
+  // Add this function definition
   const handleModalClose = () => {
     setIsModalVisible(false);
     setEditingVehicle(null);
   };
+
   const columns = [
     { title: 'License Plate', dataIndex: 'licensePlate', key: 'licensePlate' },
     { title: 'Make', dataIndex: 'make', key: 'make' },
     { title: 'Model', dataIndex: 'model', key: 'model' },
-    { title: 'Year', dataIndex: 'year', key: 'year' },
-    { title: 'Color', dataIndex: 'color', key: 'color' },
+    { 
+      title: 'Year', 
+      dataIndex: 'year', 
+      key: 'year',
+      render: (year) => year || '-'
+    },
+    { 
+      title: 'Color', 
+      dataIndex: 'color', 
+      key: 'color',
+      render: (color) => color || '-'
+    },
     { title: 'Vehicle Type', dataIndex: 'vehicleType', key: 'vehicleType' },
-    { title: 'Fuel Type', dataIndex: 'fuelType', key: 'fuelType' },
+    { 
+      title: 'Fuel Type', 
+      dataIndex: 'fuelType', 
+      key: 'fuelType',
+      render: (fuelType) => fuelType || '-'
+    },
+    { 
+      title: 'Partner', 
+      dataIndex: 'partner_name', 
+      key: 'partner_name',
+      render: (partner_name) => partner_name || 'Not Assigned'
+    },
     { title: 'Status', dataIndex: 'status', key: 'status' },
     {
       title: 'Actions',

@@ -13,13 +13,28 @@ app.use(express.json());
 app.get('/api/vehicles', async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT id, licensePlate, make, model, vehicleType, status 
-      FROM vehicles 
-      WHERE status = 'active'
-      ORDER BY licensePlate
+      SELECT 
+        v.id,
+        v.licensePlate,
+        v.make,
+        v.model,
+        v.year,
+        v.color,
+        v.vehicleType,
+        v.fuelType,
+        v.engineNumber,
+        v.chassisNumber,
+        v.status,
+        v.partner_id,
+        COALESCE(p.name, 'Not Assigned') as partner_name
+      FROM vehicles v
+      LEFT JOIN partners p ON v.partner_id = p.id
+      ORDER BY v.licensePlate
     `);
+    console.log('Database response:', rows); // Debug log
     res.json(rows);
   } catch (error) {
+    console.error('Database error:', error);
     res.status(500).json({ error: error.message });
   }
 });
