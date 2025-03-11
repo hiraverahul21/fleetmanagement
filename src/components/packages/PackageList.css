@@ -1,0 +1,102 @@
+.package-list-container {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: calc(100vh - 64px);
+  transition: padding-left 0.3s;
+}
+
+/* Add these new styles */
+.nav-sidebar.collapsed + .package-list-container {
+  padding-left: 80px;
+}
+
+.mini-nav + .package-list-container {
+  padding-left: 80px;
+}
+
+.package-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.package-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.add-package-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.add-package-btn:hover {
+  background-color: #45a049;
+}
+
+.package-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.package-grid table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.package-grid th,
+.package-grid td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.package-grid th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.package-grid tr:hover {
+  background-color: #f5f5f5;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  margin: 0 4px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+}
+
+.action-btn.edit {
+  background-color: #007bff;
+}
+
+.action-btn.delete {
+  background-color: #dc3545;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}

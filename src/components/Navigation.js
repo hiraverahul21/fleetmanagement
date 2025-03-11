@@ -30,6 +30,15 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'partner-list', label: 'Partner List', icon: 'list' }
       ]
     },
+    { 
+      id: 'packages', 
+      icon: 'box', 
+      label: 'Packages',
+      submenu: [
+        { id: 'add-package', label: 'Add Package', icon: 'plus' },
+        { id: 'package-list', label: 'Package List', icon: 'list' }
+      ]
+    },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
@@ -51,6 +60,12 @@ const Navigation = ({ onMenuSelect }) => {
       } else if (submenuItem.id === 'partner-list') {
         navigate('/dashboard/partners/list');
       }
+    } else if (parentItem.id === 'packages') {
+      if (submenuItem.id === 'add-package') {
+        navigate('/dashboard/packages/add');
+      } else if (submenuItem.id === 'package-list') {
+        navigate('/dashboard/packages/list');
+      }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
@@ -64,6 +79,8 @@ const Navigation = ({ onMenuSelect }) => {
       navigate('/dashboard/vehicles/list');
     } else if (menuItem.id === 'partners') {
       navigate('/dashboard/partners/list');
+    } else if (menuItem.id === 'packages') {
+      navigate('/dashboard/packages/list');
     }
     onMenuSelect(menuItem, true);
   };

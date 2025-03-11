@@ -8,6 +8,7 @@ import AddVehicle from './components/vehicles/AddVehicle';
 import Overview from './components/Overview';
 import PartnerList from './components/partners/PartnerList';
 import AddPartner from './components/partners/AddPartner';
+import PackageList from './components/packages/PackageList';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="vehicles/list" element={<VehicleList />} />
           <Route path="partners/add" element={<AddPartner />} />
           <Route path="partners/list" element={<PartnerList />} />
+          <Route path="packages/list" element={<PackageList />} />
         </Route>
       </Routes>
     </BrowserRouter>

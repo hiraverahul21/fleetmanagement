@@ -9,9 +9,15 @@ app.use(cors());
 app.use(express.json());
 
 // Vehicle routes
+// Get all active vehicles
 app.get('/api/vehicles', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM vehicles');
+    const [rows] = await db.query(`
+      SELECT id, licensePlate, make, model, vehicleType, status 
+      FROM vehicles 
+      WHERE status = 'active'
+      ORDER BY licensePlate
+    `);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -288,6 +294,51 @@ app.post('/api/login', async (req, res) => {
     });
   }
 });
+
+// Add all package-related endpoints before app.listen()
+app.get('/api/packages', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT p.*, c.name as company_name, s.name as supervisor_name, d.name as driver_name
+      FROM packages p
+      LEFT JOIN companies c ON p.company_id = c.id
+      LEFT JOIN staff s ON p.supervisor_id = s.id
+      LEFT JOIN drivers d ON p.driver_id = d.id
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/companies', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM companies WHERE status = "active"');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/staff', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM staff WHERE status = "active"');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/drivers', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM drivers WHERE status = "active"');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
@@ -302,6 +353,18 @@ app.get('/api/partners/names', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Error fetching partner names:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add package endpoint
+app.post('/api/packages', async (req, res) => {
+  try {
+    const package = req.body;
+    const [result] = await db.query('INSERT INTO packages SET ?', package);
+    res.status(201).json({ id: result.insertId, ...package });
+  } catch (error) {
+    console.error('Error adding package:', error);
     res.status(500).json({ error: error.message });
   }
 });
