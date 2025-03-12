@@ -60,32 +60,36 @@ const Navigation = ({ onMenuSelect }) => {
   // Update handleSubmenuClick to handle partner routes
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
     e.stopPropagation();
-    setIsOpen(false);
-    if (parentItem.id === 'vehicles') {
-      if (submenuItem.id === 'add-vehicle') {
-        navigate('/dashboard/vehicles/add');
-      } else if (submenuItem.id === 'vehicle-list') {
-        navigate('/dashboard/vehicles/list');
-      } else {
-        navigate(`/dashboard/vehicles/${submenuItem.id}`);
-      }
-    } else if (parentItem.id === 'partners') {
-      if (submenuItem.id === 'add-partner') {
-        navigate('/dashboard/partners/add');
-      } else if (submenuItem.id === 'partner-list') {
-        navigate('/dashboard/partners/list');
-      }
-    } else if (parentItem.id === 'packages') {
-      if (submenuItem.id === 'add-package') {
-        navigate('/dashboard/packages/add');
-      } else if (submenuItem.id === 'package-list') {
-        navigate('/dashboard/packages/list');
-      }
-    } else if (parentItem.id === 'routes') {
-      if (submenuItem.id === 'add-route') {
-        navigate('/dashboard/routes/add');
-      } else if (submenuItem.id === 'route-list') {
-        navigate('/dashboard/routes/list');
+    if (parentItem.id === 'routes' && submenuItem.id === 'add-route') {
+      // Keep sidebar state and navigate
+      navigate('/dashboard/routes/add');
+    } else {
+      // Existing navigation logic for other items
+      setIsOpen(false);
+      if (parentItem.id === 'vehicles') {
+        if (submenuItem.id === 'add-vehicle') {
+          navigate('/dashboard/vehicles/add');
+        } else if (submenuItem.id === 'vehicle-list') {
+          navigate('/dashboard/vehicles/list');
+        } else {
+          navigate(`/dashboard/vehicles/${submenuItem.id}`);
+        }
+      } else if (parentItem.id === 'partners') {
+        if (submenuItem.id === 'add-partner') {
+          navigate('/dashboard/partners/add');
+        } else if (submenuItem.id === 'partner-list') {
+          navigate('/dashboard/partners/list');
+        }
+      } else if (parentItem.id === 'packages') {
+        if (submenuItem.id === 'add-package') {
+          navigate('/dashboard/packages/add');
+        } else if (submenuItem.id === 'package-list') {
+          navigate('/dashboard/packages/list');
+        }
+      } else if (parentItem.id === 'routes') {
+        if (submenuItem.id === 'route-list') {
+          navigate('/dashboard/routes/list');
+        }
       }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);

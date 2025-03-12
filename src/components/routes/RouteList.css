@@ -9,6 +9,37 @@
   margin-bottom: 24px;
 }
 
-.route-header h2 {
-  margin: 0;
+.routes-table {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.route-stops-detail {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.route-stops-detail h4 {
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+
+.ant-table-row-expand-icon-cell {
+  width: 60px;
+}
+
+.route-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.pickup-points-detail {
+  padding: 16px;
+  background: #fafafa;
+}
+
+.pickup-points-detail h4 {
+  margin-bottom: 16px;
 }
