@@ -27,6 +27,7 @@ app.get('/api/route-stops', async (req, res) => {
   }
 });
 
+// Update the POST route endpoint
 app.post('/api/routes', async (req, res) => {
   let connection;
   try {
@@ -35,19 +36,19 @@ app.post('/api/routes', async (req, res) => {
     
     const { mainRoute, stops } = req.body;
     
-    // Insert main route
+    // Insert main route with company_route_id
     const [routeResult] = await connection.query(
-      'INSERT INTO main_route (company_id, route_name, route_from, route_to, route_total_kms) VALUES (?, ?, ?, ?, ?)',
-      [mainRoute.company_id, mainRoute.route_name, mainRoute.route_from, mainRoute.route_to, mainRoute.route_total_kms]
+      'INSERT INTO main_route (company_id, company_route_id, route_name, route_from, route_to, route_total_kms) VALUES (?, ?, ?, ?, ?, ?)',
+      [mainRoute.company_id, mainRoute.company_route_id, mainRoute.route_name, mainRoute.route_from, mainRoute.route_to, mainRoute.route_total_kms]
     );
     
     const routeId = routeResult.insertId;
     
-    // Insert route stops
+    // Insert route stops with time fields
     for (const stop of stops) {
       await connection.query(
-        'INSERT INTO route_stops (route_id, stop_srno, start_from, end_to, stop_kms) VALUES (?, ?, ?, ?, ?)',
-        [routeId, stop.stop_srno, stop.start_from, stop.end_to, stop.stop_kms]
+        'INSERT INTO route_stops (route_id, stop_srno, start_from, end_to, stop_kms, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [routeId, stop.stop_srno, stop.start_from, stop.end_to, stop.stop_kms, stop.start_time, stop.end_time]
       );
     }
     
@@ -62,6 +63,26 @@ app.post('/api/routes', async (req, res) => {
     if (connection) {
       connection.release();
     }
+  }
+});
+
+// Update the GET routes endpoint to include company_route_id
+app.get('/api/routes', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT *, company_route_id FROM main_route');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update the GET route-stops endpoint to include time fields
+app.get('/api/route-stops', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT *, TIME_FORMAT(start_time, "%H:%i") as start_time, TIME_FORMAT(end_time, "%H:%i") as end_time FROM route_stops ORDER BY route_id, stop_srno');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

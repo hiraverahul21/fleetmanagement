@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, message } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, TimePicker, message } from 'antd';
 import { PlusOutlined, EnvironmentOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import './RouteList.css';
@@ -8,25 +8,30 @@ const RouteList = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  
-  const mainRouteData = [
-    {
-      route_id: 1,
-      company_id: 1,
-      route_name: 'Pune - Hinjewadi',
-      route_from: 'Pune',
-      route_to: 'Hinjewadi',
-      route_total_kms: 29
+  const [mainRouteData, setMainRouteData] = useState([]);
+  const [routeStopsData, setRouteStopsData] = useState([]);
+
+  useEffect(() => {
+    fetchRouteData();
+  }, []);
+
+  const fetchRouteData = async () => {
+    try {
+      setLoading(true);
+      const [mainRoutes, stops] = await Promise.all([
+        axios.get('http://localhost:5000/api/routes'),
+        axios.get('http://localhost:5000/api/route-stops')
+      ]);
+      setMainRouteData(mainRoutes.data);
+      setRouteStopsData(stops.data);
+    } catch (error) {
+      message.error('Failed to fetch route data');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const routeStopsData = [
-    { route_id: 1, stop_srno: 1, start_from: 'Pune', end_to: 'PCMC', stop_kms: 3 },
-    { route_id: 1, stop_srno: 2, start_from: 'PCMC', end_to: 'Univercity', stop_kms: 12 },
-    { route_id: 1, stop_srno: 3, start_from: 'Univercity', end_to: 'Aundh', stop_kms: 6 },
-    { route_id: 1, stop_srno: 4, start_from: 'Aundh', end_to: 'Hinjewadi', stop_kms: 8 }
-  ];
-
+  // Remove the hardcoded data declarations and continue with mainColumns definition
   const mainColumns = [
     {
       title: 'Route ID',
@@ -69,6 +74,12 @@ const RouteList = () => {
       width: '15%'
     },
     {
+      title: 'Company Route ID',
+      dataIndex: 'company_route_id',
+      key: 'company_route_id',
+      width: '15%'
+    },
+    {
       title: 'Actions',
       key: 'actions',
       width: '10%',
@@ -105,6 +116,18 @@ const RouteList = () => {
       dataIndex: 'stop_kms',
       key: 'stop_kms',
       width: '20%'
+    },
+    { 
+      title: 'Start Time',
+      dataIndex: 'start_time',
+      key: 'start_time',
+      width: '15%'
+    },
+    { 
+      title: 'End Time',
+      dataIndex: 'end_time',
+      key: 'end_time',
+      width: '15%'
     }
   ];
 
@@ -115,7 +138,8 @@ const RouteList = () => {
       
       const routeData = {
         mainRoute: {
-          company_id: 1, // You might want to make this dynamic
+          company_id: 1,
+          company_route_id: values.company_route_id,
           route_name: `${values.route_from} - ${values.route_to}`,
           route_from: values.route_from,
           route_to: values.route_to,
@@ -123,7 +147,9 @@ const RouteList = () => {
         },
         stops: values.stops.map((stop, index) => ({
           ...stop,
-          stop_srno: index + 1
+          stop_srno: index + 1,
+          start_time: stop.start_time?.format('HH:mm:ss'),
+          end_time: stop.end_time?.format('HH:mm:ss')
         }))
       };
 
@@ -139,7 +165,9 @@ const RouteList = () => {
     }
   };
 
-  // Add this JSX before the main Table component
+  // Remove the second stopColumns declaration (around line 166)
+  // Keep only the first stopColumns declaration that includes the 'Start Time' and 'End Time' columns
+
   const addRouteModal = (
     <Modal
       title="Add New Route"
@@ -153,6 +181,14 @@ const RouteList = () => {
         onFinish={handleAddRoute}
         layout="vertical"
       >
+        <Form.Item
+          name="company_route_id"
+          label="Company Route ID"
+          rules={[{ required: true }]}
+        >
+          <Input placeholder="Enter company route ID" />
+        </Form.Item>
+
         <Form.Item
           name="route_from"
           label="Start Point"
@@ -199,6 +235,24 @@ const RouteList = () => {
                     rules={[{ required: true }]}
                   >
                     <Input type="number" placeholder="Distance" />
+                  </Form.Item>
+
+                  <Form.Item
+                    {...field}
+                    label="Start Time"
+                    name={[field.name, 'start_time']}
+                    rules={[{ required: true }]}
+                  >
+                    <TimePicker format="HH:mm" />
+                  </Form.Item>
+
+                  <Form.Item
+                    {...field}
+                    label="End Time"
+                    name={[field.name, 'end_time']}
+                    rules={[{ required: true }]}
+                  >
+                    <TimePicker format="HH:mm" />
                   </Form.Item>
 
                   <MinusCircleOutlined onClick={() => remove(field.name)} />
