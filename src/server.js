@@ -20,7 +20,14 @@ app.get('/api/routes', async (req, res) => {
 
 app.get('/api/route-stops', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM route_stops ORDER BY route_id, stop_srno');
+    const [rows] = await db.query(`
+      SELECT 
+        *,
+        TIME_FORMAT(start_time, '%H:%i') as start_time,
+        TIME_FORMAT(end_time, '%H:%i') as end_time 
+      FROM route_stops 
+      ORDER BY route_id, stop_srno
+    `);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -39,7 +46,14 @@ app.post('/api/routes', async (req, res) => {
     // Insert main route with company_route_id
     const [routeResult] = await connection.query(
       'INSERT INTO main_route (company_id, company_route_id, route_name, route_from, route_to, route_total_kms) VALUES (?, ?, ?, ?, ?, ?)',
-      [mainRoute.company_id, mainRoute.company_route_id, mainRoute.route_name, mainRoute.route_from, mainRoute.route_to, mainRoute.route_total_kms]
+      [
+        mainRoute.company_id,
+        mainRoute.company_route_id,
+        mainRoute.route_name,
+        mainRoute.route_from,
+        mainRoute.route_to,
+        mainRoute.route_total_kms
+      ]
     );
     
     const routeId = routeResult.insertId;
@@ -48,7 +62,15 @@ app.post('/api/routes', async (req, res) => {
     for (const stop of stops) {
       await connection.query(
         'INSERT INTO route_stops (route_id, stop_srno, start_from, end_to, stop_kms, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [routeId, stop.stop_srno, stop.start_from, stop.end_to, stop.stop_kms, stop.start_time, stop.end_time]
+        [
+          routeId,
+          stop.stop_srno,
+          stop.start_from,
+          stop.end_to,
+          stop.stop_kms,
+          stop.start_time,
+          stop.end_time
+        ]
       );
     }
     
@@ -58,6 +80,7 @@ app.post('/api/routes', async (req, res) => {
     if (connection) {
       await connection.rollback();
     }
+    console.error('Error adding route:', error);
     res.status(500).json({ error: error.message });
   } finally {
     if (connection) {
