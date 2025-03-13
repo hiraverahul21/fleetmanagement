@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Tag, Space, Modal, Form, Input, TimePicker, message } from 'antd';
+import { Table, Button, Tag, Space, Modal, Form, Input, TimePicker, Select, message } from 'antd';
 import { PlusOutlined, EnvironmentOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import './RouteList.css';
@@ -80,6 +80,17 @@ const RouteList = () => {
       width: '15%'
     },
     {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      width: '10%',
+      render: (status) => (
+        <Tag color={status === 'active' ? 'green' : 'red'}>
+          {status?.toUpperCase() || 'ACTIVE'}
+        </Tag>
+      )
+    },
+    {
       title: 'Actions',
       key: 'actions',
       width: '10%',
@@ -143,7 +154,8 @@ const RouteList = () => {
           route_name: `${values.route_from} - ${values.route_to}`,
           route_from: values.route_from,
           route_to: values.route_to,
-          route_total_kms: totalKms
+          route_total_kms: totalKms,
+          status: values.status
         },
         stops: values.stops.map((stop, index) => ({
           ...stop,
@@ -203,6 +215,18 @@ const RouteList = () => {
           rules={[{ required: true }]}
         >
           <Input placeholder="Enter end point" />
+        </Form.Item>
+
+        <Form.Item
+          name="status"
+          label="Status"
+          initialValue="active"
+          rules={[{ required: true }]}
+        >
+          <Select>
+            <Select.Option value="active">Active</Select.Option>
+            <Select.Option value="inactive">Inactive</Select.Option>
+          </Select>
         </Form.Item>
 
         <Form.List name="stops">

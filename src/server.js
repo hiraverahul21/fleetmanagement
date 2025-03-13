@@ -43,16 +43,17 @@ app.post('/api/routes', async (req, res) => {
     
     const { mainRoute, stops } = req.body;
     
-    // Insert main route with company_route_id
+    // Insert main route with status
     const [routeResult] = await connection.query(
-      'INSERT INTO main_route (company_id, company_route_id, route_name, route_from, route_to, route_total_kms) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO main_route (company_id, company_route_id, route_name, route_from, route_to, route_total_kms, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         mainRoute.company_id,
         mainRoute.company_route_id,
         mainRoute.route_name,
         mainRoute.route_from,
         mainRoute.route_to,
-        mainRoute.route_total_kms
+        mainRoute.route_total_kms,
+        mainRoute.status || 'active'
       ]
     );
     
