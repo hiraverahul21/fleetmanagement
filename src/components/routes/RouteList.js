@@ -209,6 +209,45 @@ const RouteList = () => {
     }
   ];
 
+  const stopColumns = [
+    { 
+      title: 'Stop No',
+      dataIndex: 'stop_srno',
+      key: 'stop_srno',
+      width: '10%'
+    },
+    { 
+      title: 'Start From',
+      dataIndex: 'start_from',
+      key: 'start_from',
+      width: '30%'
+    },
+    { 
+      title: 'End To',
+      dataIndex: 'end_to',
+      key: 'end_to',
+      width: '30%'
+    },
+    { 
+      title: 'Stop Distance (KM)',
+      dataIndex: 'stop_kms',
+      key: 'stop_kms',
+      width: '20%'
+    },
+    { 
+      title: 'Start Time',
+      dataIndex: 'start_time',
+      key: 'start_time',
+      width: '15%'
+    },
+    { 
+      title: 'End Time',
+      dataIndex: 'end_time',
+      key: 'end_time',
+      width: '15%'
+    }
+  ];
+
   // Update the Modal title and form onFinish
   const addRouteModal = (
     <Modal
