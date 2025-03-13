@@ -553,3 +553,66 @@ app.get('/api/partners/names', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.put('/api/routes/:id', async (req, res) => {
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+    
+    const { mainRoute, stops } = req.body;
+    const routeId = req.params.id;
+
+    // Update main route
+    await connection.query(
+      `UPDATE main_route SET 
+        company_route_id = ?, 
+        route_name = ?, 
+        route_from = ?, 
+        route_to = ?, 
+        route_total_kms = ?,
+        status = ?
+      WHERE route_id = ?`,
+      [
+        mainRoute.company_route_id,
+        mainRoute.route_name,
+        mainRoute.route_from,
+        mainRoute.route_to,
+        mainRoute.route_total_kms,
+        mainRoute.status,
+        routeId
+      ]
+    );
+
+    // Delete existing stops
+    await connection.query('DELETE FROM route_stops WHERE route_id = ?', [routeId]);
+
+    // Insert updated stops
+    for (const stop of stops) {
+      await connection.query(
+        'INSERT INTO route_stops (route_id, stop_srno, start_from, end_to, stop_kms, start_time, end_time) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          routeId,
+          stop.stop_srno,
+          stop.start_from,
+          stop.end_to,
+          stop.stop_kms,
+          stop.start_time,
+          stop.end_time
+        ]
+      );
+    }
+
+    await connection.commit();
+    res.json({ message: 'Route updated successfully' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Error updating route:', error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+});
