@@ -61,6 +61,24 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 1000px;
+  font-size: 14px; /* Reduced font size */
+}
+
+.package-grid th {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.package-grid td {
+  font-size: 13px;
+}
+
+.package-header h2 {
+  font-size: 20px;
+}
+
+.add-package-btn {
+  font-size: 14px;
 }
 
 .package-grid th,
