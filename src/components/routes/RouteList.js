@@ -203,7 +203,6 @@ const RouteList = () => {
           >
             Edit
           </Button>
-          <Button type="primary" danger size="small">Delete</Button>
         </Space>
       ),
     }
