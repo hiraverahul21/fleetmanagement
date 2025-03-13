@@ -10,6 +10,7 @@ const PackageList = () => {
   const [companies, setCompanies] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const [partners, setPartners] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -19,18 +20,19 @@ const PackageList = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch all required data
-      const [packagesRes, companiesRes, supervisorsRes, driversRes] = await Promise.all([
+      const [packagesRes, companiesRes, supervisorsRes, driversRes, partnersRes] = await Promise.all([
         axios.get('http://localhost:5000/api/packages'),
         axios.get('http://localhost:5000/api/companies'),
         axios.get('http://localhost:5000/api/staff'),
-        axios.get('http://localhost:5000/api/drivers')
+        axios.get('http://localhost:5000/api/drivers'),
+        axios.get('http://localhost:5000/api/partners')
       ]);
 
       setPackages(packagesRes.data);
       setCompanies(companiesRes.data);
       setSupervisors(supervisorsRes.data);
       setDrivers(driversRes.data);
+      setPartners(partnersRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -45,7 +47,7 @@ const PackageList = () => {
   };
 
   const handlePackageAdded = async (newPackage) => {
-    await fetchData(); // Fetch fresh data after adding package
+    await fetchData();
     handleModalClose();
   };
 
@@ -62,6 +64,7 @@ const PackageList = () => {
           <table>
             <thead>
               <tr>
+                <th>Partner Name</th>
                 <th>Vehicle No</th>
                 <th>Route ID</th>
                 <th>Route Name</th>
@@ -80,9 +83,11 @@ const PackageList = () => {
                 const company = companies.find(c => c.id === pkg.company_id);
                 const supervisor = supervisors.find(s => s.id === pkg.supervisor_id);
                 const driver = drivers.find(d => d.id === pkg.driver_id);
+                const partner = partners.find(p => p.id === pkg.partner_id);
 
                 return (
                   <tr key={pkg.id}>
+                    <td>{partner?.name || ''}</td>
                     <td>{pkg.vehicle_no}</td>
                     <td>{pkg.route_id}</td>
                     <td>{pkg.route_name}</td>
