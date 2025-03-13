@@ -4,7 +4,8 @@ import './AddPackageModal.css';
 
 const AddPackageModal = ({ show, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
-    vehicle_no: '',  // Changed from direct input to dropdown selection
+    partner_id: '',
+    vehicle_no: '',
     route_id: '',
     route_name: '',
     driver_id: '',
@@ -19,43 +20,92 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
   const [companies, setCompanies] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [drivers, setDrivers] = useState([]);
-  const [vehicles, setVehicles] = useState([]); // Add vehicles state
+  const [vehicles, setVehicles] = useState([]);
+  const [partners, setPartners] = useState([]);
 
-  useEffect(() => {
-    fetchDropdownData();
-  }, []);
-
+  // Move fetchDropdownData inside component, after state declarations
   const fetchDropdownData = async () => {
     try {
-      const [companiesRes, supervisorsRes, driversRes, vehiclesRes] = await Promise.all([
+      const [companiesRes, supervisorsRes, driversRes, partnersRes] = await Promise.all([
         axios.get('http://localhost:5000/api/companies'),
         axios.get('http://localhost:5000/api/staff'),
         axios.get('http://localhost:5000/api/drivers'),
-        axios.get('http://localhost:5000/api/vehicles') // Add vehicles API call
+        axios.get('http://localhost:5000/api/partners')
       ]);
 
       setCompanies(companiesRes.data);
       setSupervisors(supervisorsRes.data);
       setDrivers(driversRes.data);
-      setVehicles(vehiclesRes.data);
+      setPartners(partnersRes.data);
     } catch (error) {
       console.error('Error fetching dropdown data:', error);
     }
   };
 
+  // Update useEffect to fetch initial data
+  useEffect(() => {
+    fetchDropdownData();
+  }, []);
+
+  // Keep only one vehicle fetch useEffect
+  // Update vehicle fetch useEffect with the correct API endpoint
+  useEffect(() => {
+    if (formData.partner_id) {
+      axios.get(`http://localhost:5000/api/vehicles?partner_id=${formData.partner_id}`)
+        .then(response => {
+          console.log('Fetched vehicles for partner:', response.data);
+          setVehicles(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching vehicles:', error);
+        });
+    } else {
+      setVehicles([]);
+    }
+  }, [formData.partner_id]);
+
+  // Update getFilteredVehicles function to filter by partner_id
+    const getFilteredVehicles = () => {
+      if (!formData.partner_id) return [];
+      // Filter vehicles where partner_id matches the selected partner
+      return vehicles.filter(vehicle => vehicle.partner_id === parseInt(formData.partner_id));
+    };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value,
+      ...(name === 'partner_id' && { vehicle_no: '' })
+    }));
+  };
+
+  // Add after getFilteredVehicles function and before if (!show) return null;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/packages', formData);
-      onAdd(response.data);
-      onClose();
+      if (response.data) {
+        onAdd(response.data);
+        onClose();
+        setFormData({
+          partner_id: '',
+          vehicle_no: '',
+          route_id: '',
+          route_name: '',
+          driver_id: '',
+          no_of_days: '',
+          monthly_kms: '',
+          actual_kms: '',
+          company_id: '',
+          diesel_status: 'Self',
+          supervisor_id: ''
+        });
+      }
     } catch (error) {
       console.error('Error adding package:', error);
+      alert('Failed to add package');
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   if (!show) return null;
@@ -69,6 +119,25 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
+            {/* Partner dropdown */}
+            <div className="form-group">
+              <label>Partner Name</label>
+              <select
+                name="partner_id"
+                value={formData.partner_id}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Partner</option>
+                {partners.map(partner => (
+                  <option key={partner.id} value={partner.id}>
+                    {partner.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Vehicle dropdown */}
             <div className="form-group">
               <label>Vehicle No</label>
               <select
@@ -76,9 +145,10 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                 value={formData.vehicle_no}
                 onChange={handleChange}
                 required
+                disabled={!formData.partner_id}
               >
                 <option value="">Select Vehicle</option>
-                {vehicles.map(vehicle => (
+                {getFilteredVehicles().map(vehicle => (
                   <option key={vehicle.id} value={vehicle.licensePlate}>
                     {vehicle.licensePlate} - {vehicle.make} {vehicle.model}
                   </option>
