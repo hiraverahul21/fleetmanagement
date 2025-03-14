@@ -517,6 +517,23 @@ app.get('/api/companies', async (req, res) => {
   }
 });
 
+// Move this before app.listen()
+app.get('/api/companies/with-routes', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DISTINCT c.* 
+      FROM companies c
+      INNER JOIN main_route mr ON c.id = mr.company_id
+      WHERE c.status = "active"
+      ORDER BY c.name
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching companies with routes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/staff', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM staff WHERE status = "active"');

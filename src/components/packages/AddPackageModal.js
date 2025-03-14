@@ -24,10 +24,11 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
   const [partners, setPartners] = useState([]);
 
   // Move fetchDropdownData inside component, after state declarations
+  // Update fetchDropdownData function
   const fetchDropdownData = async () => {
     try {
       const [companiesRes, supervisorsRes, driversRes, partnersRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/companies'),
+        axios.get('http://localhost:5000/api/companies/with-routes'),  // Updated endpoint
         axios.get('http://localhost:5000/api/staff'),
         axios.get('http://localhost:5000/api/drivers'),
         axios.get('http://localhost:5000/api/partners')
