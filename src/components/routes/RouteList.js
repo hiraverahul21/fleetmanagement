@@ -90,8 +90,11 @@ const RouteList = () => {
         end_time: stop.end_time ? moment(stop.end_time, 'HH:mm') : null,
       }));
 
+      // Log the incoming record data
+      console.log('Record data:', record);
+      
       form.setFieldsValue({
-        company_id: record.company_id, // Add this line
+        company_id: record.company_id, // Remove parseInt to keep original value
         company_route_id: record.company_route_id,
         route_from: record.route_from,
         route_to: record.route_to,
@@ -112,34 +115,56 @@ const RouteList = () => {
       setLoading(true);
       const totalKms = values.stops.reduce((sum, stop) => sum + Number(stop.stop_kms), 0);
       
-      const routeData = {
+      const companyId = Number(values.company_id);
+      const routeId = Number(selectedRoute.route_id);
+
+      // Create update payload with both main route and stops
+      const updatePayload = {
         mainRoute: {
-          company_id: values.company_id, // Changed from selectedRoute.company_id to values.company_id
+          route_id: routeId,
+          company_id: companyId,
           company_route_id: values.company_route_id,
           route_name: `${values.route_from} - ${values.route_to}`,
           route_from: values.route_from,
           route_to: values.route_to,
-          route_total_kms: totalKms,
+          route_total_kms: Number(totalKms),
           status: values.status
         },
         stops: values.stops.map((stop, index) => ({
-          ...stop,
-          route_id: selectedRoute.route_id,
+          route_id: routeId,
           stop_srno: index + 1,
+          start_from: stop.start_from,
+          end_to: stop.end_to,
+          stop_kms: Number(stop.stop_kms).toFixed(2),
           start_time: stop.start_time?.format('HH:mm:ss'),
           end_time: stop.end_time?.format('HH:mm:ss')
         }))
       };
-    
-      await axios.put(`http://localhost:5000/api/routes/${selectedRoute.route_id}`, routeData);
-      message.success('Route updated successfully');
-      setIsModalVisible(false);
-      setIsEditMode(false);
-      setSelectedRoute(null);
-      form.resetFields();
-      fetchRouteData();
+
+      // Use the original update endpoint
+      const response = await axios.put(
+        `http://localhost:5000/api/routes/${routeId}`,
+        updatePayload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.message === 'Route updated successfully') {
+        await fetchRouteData();
+        message.success('Route updated successfully');
+        setIsModalVisible(false);
+        setIsEditMode(false);
+        setSelectedRoute(null);
+        form.resetFields();
+      } else {
+        throw new Error('Update failed');
+      }
     } catch (error) {
-      message.error('Failed to update route');
+      console.error('Update error:', error);
+      message.error(`Failed to update route: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -151,6 +176,16 @@ const RouteList = () => {
       dataIndex: 'route_id',
       key: 'route_id',
       width: '10%'
+    },
+    {
+      title: 'Company',
+      dataIndex: 'company_id',
+      key: 'company_id',
+      width: '15%',
+      render: (company_id) => {
+        const company = companies.find(c => c.id === company_id);
+        return company ? company.name : 'N/A';
+      }
     },
     {
       title: 'Route Name',
@@ -221,6 +256,7 @@ const RouteList = () => {
     }
   ];
 
+  // In the stopColumns definition, add a unique key combination
   const stopColumns = [
     { 
       title: 'Stop No',
@@ -264,7 +300,7 @@ const RouteList = () => {
   const addRouteModal = (
     <Modal
       title={isEditMode ? "Edit Route" : "Add New Route"}
-      visible={isModalVisible}
+      open={isModalVisible}
       onCancel={() => {
         setIsModalVisible(false);
         setIsEditMode(false);
@@ -336,46 +372,51 @@ const RouteList = () => {
             {fields.map((field, index) => (
               <Space key={field.key} align="baseline">
                 <Form.Item
-                  {...field}
+                  key={`${field.key}_start`}
                   label="Start From"
                   name={[field.name, 'start_from']}
                   rules={[{ required: true }]}
+                  fieldKey={[field.fieldKey, 'start_from']}
                 >
                   <Input placeholder="Start location" />
                 </Form.Item>
 
                 <Form.Item
-                  {...field}
+                  key={`${field.key}_end`}
                   label="End To"
                   name={[field.name, 'end_to']}
                   rules={[{ required: true }]}
+                  fieldKey={[field.fieldKey, 'end_to']}
                 >
                   <Input placeholder="End location" />
                 </Form.Item>
 
                 <Form.Item
-                  {...field}
+                  key={`${field.key}_distance`}
                   label="Distance (KM)"
                   name={[field.name, 'stop_kms']}
                   rules={[{ required: true }]}
+                  fieldKey={[field.fieldKey, 'stop_kms']}
                 >
                   <Input type="number" placeholder="Distance" />
                 </Form.Item>
 
                 <Form.Item
-                  {...field}
+                  key={`${field.key}_start_time`}
                   label="Start Time"
                   name={[field.name, 'start_time']}
                   rules={[{ required: true }]}
+                  fieldKey={[field.fieldKey, 'start_time']}
                 >
                   <TimePicker format="HH:mm" />
                 </Form.Item>
 
                 <Form.Item
-                  {...field}
+                  key={`${field.key}_end_time`}
                   label="End Time"
                   name={[field.name, 'end_time']}
                   rules={[{ required: true }]}
+                  fieldKey={[field.fieldKey, 'end_time']}
                 >
                   <TimePicker format="HH:mm" />
                 </Form.Item>
@@ -429,7 +470,10 @@ return (
               <h4>Route Stops</h4>
               <Table 
                 columns={stopColumns}
-                dataSource={stops}
+                dataSource={stops.map(stop => ({
+                  ...stop,
+                  key: `${stop.route_id}_${stop.stop_srno}` // Add unique key combination
+                }))}
                 pagination={false}
                 size="small"
               />
@@ -437,7 +481,7 @@ return (
           );
         },
       }}
-      rowKey="route_id"
+      rowKey={(record) => record.route_id.toString()} // Ensure main table row keys are strings
     />
   </div>
 );

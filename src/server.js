@@ -566,6 +566,7 @@ app.put('/api/routes/:id', async (req, res) => {
     await connection.query(
       `UPDATE main_route SET 
         company_route_id = ?, 
+        company_id= ?,
         route_name = ?, 
         route_from = ?, 
         route_to = ?, 
@@ -574,6 +575,7 @@ app.put('/api/routes/:id', async (req, res) => {
       WHERE route_id = ?`,
       [
         mainRoute.company_route_id,
+        mainRoute.company_id,
         mainRoute.route_name,
         mainRoute.route_from,
         mainRoute.route_to,
