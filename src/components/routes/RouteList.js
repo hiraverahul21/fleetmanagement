@@ -91,6 +91,7 @@ const RouteList = () => {
       }));
 
       form.setFieldsValue({
+        company_id: record.company_id, // Add this line
         company_route_id: record.company_route_id,
         route_from: record.route_from,
         route_to: record.route_to,
@@ -113,7 +114,7 @@ const RouteList = () => {
       
       const routeData = {
         mainRoute: {
-          company_id: selectedRoute.company_id,
+          company_id: values.company_id, // Changed from selectedRoute.company_id to values.company_id
           company_route_id: values.company_route_id,
           route_name: `${values.route_from} - ${values.route_to}`,
           route_from: values.route_from,
