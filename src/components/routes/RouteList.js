@@ -11,12 +11,24 @@ const RouteList = () => {
   const [loading, setLoading] = useState(false);
   const [mainRouteData, setMainRouteData] = useState([]);
   const [routeStopsData, setRouteStopsData] = useState([]);
+  const [companies, setCompanies] = useState([]); // Add this line
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
     fetchRouteData();
+    fetchCompanies(); // Add this line
   }, []);
+
+  // Add this function
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/companies');
+      setCompanies(response.data);
+    } catch (error) {
+      message.error('Failed to fetch companies');
+    }
+  };
 
   const fetchRouteData = async () => {
     try {
@@ -41,7 +53,7 @@ const RouteList = () => {
       
       const routeData = {
         mainRoute: {
-          company_id: 1,
+          company_id: values.company_id, // Update this line
           company_route_id: values.company_route_id,
           route_name: `${values.route_from} - ${values.route_to}`,
           route_from: values.route_from,
@@ -261,18 +273,33 @@ const RouteList = () => {
       footer={null}
       width={800}
     >
+      
       <Form
         form={form}
         onFinish={isEditMode ? handleEditRoute : handleAddRoute}
         layout="vertical"
       >
-      <Form.Item
-        name="company_route_id"
-        label="Company Route ID"
-        rules={[{ required: true }]}
-      >
-        <Input placeholder="Enter company route ID" />
-      </Form.Item>
+        <Form.Item
+          name="company_id"
+          label="Company"
+          rules={[{ required: true, message: 'Please select a company' }]}
+        >
+          <Select placeholder="Select company">
+            {companies.map(company => (
+              <Select.Option key={company.id} value={company.id}>
+                {company.name}
+              </Select.Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="company_route_id"
+          label="Company Route ID"
+          rules={[{ required: true }]}
+        >
+          <Input placeholder="Enter company route ID" />
+        </Form.Item>
 
       <Form.Item
         name="route_from"
