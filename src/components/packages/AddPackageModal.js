@@ -17,11 +17,35 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
     supervisor_id: ''
   });
 
+  // Add new state for routes
+  const [availableRoutes, setAvailableRoutes] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [partners, setPartners] = useState([]);
+
+  // Add handleCompanyChange function
+  const handleCompanyChange = async (e) => {
+    const selectedCompanyId = e.target.value;
+    handleChange(e);
+    
+    try {
+      const response = await axios.get(`http://localhost:5000/api/main-routes/company`, {
+        params: {
+          company_id: selectedCompanyId
+        }
+      });
+      setAvailableRoutes(response.data);
+      setFormData(prev => ({
+        ...prev,
+        route_id: '',
+        route_name: ''
+      }));
+    } catch (error) {
+      console.error('Error fetching routes:', error);
+    }
+  };
 
   // Move fetchDropdownData inside component, after state declarations
   // Update fetchDropdownData function
@@ -178,7 +202,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
               <h3>Company</h3>
               <div className="form-group">
                 <label>Company</label>
-                <select name="company_id" value={formData.company_id} onChange={handleChange} required>
+                <select name="company_id" value={formData.company_id} onChange={handleCompanyChange} required>
                   <option value="">Select Company</option>
                   {companies.map(company => (
                     <option key={company.id} value={company.id}>{company.name}</option>
@@ -188,14 +212,41 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
 
               <div className="form-group">
                 <label>Route ID</label>
-                <input type="text" name="route_id" value={formData.route_id} onChange={handleChange} required />
+                <select 
+                  name="route_id" 
+                  value={formData.route_id} 
+                  onChange={(e) => {
+                    const selectedRoute = availableRoutes.find(route => route.route_id === parseInt(e.target.value));
+                    if (selectedRoute) {
+                      setFormData(prev => ({
+                        ...prev,
+                        route_id: e.target.value,
+                        route_name: selectedRoute.route_name
+                      }));
+                    }
+                  }}
+                  required
+                  disabled={!formData.company_id}
+                >
+                  <option value="">Select Route</option>
+                  {availableRoutes.map(route => (
+                    <option key={route.route_id} value={route.route_id}>
+                      {route.company_route_id} - {route.route_name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
                 <label>Route Name</label>
-                <input type="text" name="route_name" value={formData.route_name} onChange={handleChange} required />
+                <input 
+                  type="text" 
+                  name="route_name" 
+                  value={formData.route_name} 
+                  readOnly 
+                  required 
+                />
               </div>
-
               <div className="form-group">
                 <label>No of Days</label>
                 <input type="number" name="no_of_days" value={formData.no_of_days} onChange={handleChange} required />

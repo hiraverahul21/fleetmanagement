@@ -558,6 +558,29 @@ app.listen(port, () => {
 });
 
 // Add this with your other API endpoints
+app.get('/api/main-routes/company', async (req, res) => {
+  try {
+    const { company_id } = req.query;
+    const [rows] = await db.query(`
+      SELECT 
+        route_id,
+        company_route_id,
+        route_name,
+        route_from,
+        route_to,
+        route_total_kms
+      FROM main_route 
+      WHERE company_id = ? AND status = 'active'
+      ORDER BY route_name
+    `, [company_id]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching company routes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update the partners names endpoint
 app.get('/api/partners/names', async (req, res) => {
   try {
