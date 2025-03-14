@@ -103,7 +103,10 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
     setFormData(prevState => ({
       ...prevState,
       [name]: value,
-      ...(name === 'partner_id' && { vehicle_no: '' })
+      ...(name === 'partner_id' && { vehicle_no: '' }),
+      ...(name === 'no_of_days' && { 
+        monthly_kms: prevState.route_total_kms ? (parseFloat(prevState.route_total_kms) * parseFloat(value)) : ''
+      })
     }));
   };
 
@@ -111,7 +114,10 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/packages', formData);
+      // Create a new object without route_total_kms
+      const { route_total_kms, ...packageData } = formData;
+      
+      const response = await axios.post('http://localhost:5000/api/packages', packageData);
       if (response.data) {
         onAdd(response.data);
         onClose();
@@ -120,6 +126,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
           vehicle_no: '',
           route_id: '',
           route_name: '',
+          route_total_kms: '',
           driver_id: '',
           no_of_days: '',
           monthly_kms: '',
