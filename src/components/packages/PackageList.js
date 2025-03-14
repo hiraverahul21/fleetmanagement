@@ -67,6 +67,7 @@ const PackageList = () => {
                 <th>Partner Name</th>
                 <th>Vehicle No</th>
                 <th>Route ID</th>
+                <th>Company Route ID</th>
                 <th>Route Name</th>
                 <th>Driver Name</th>
                 <th>No of Days</th>
@@ -90,6 +91,7 @@ const PackageList = () => {
                     <td>{partner?.name || ''}</td>
                     <td>{pkg.vehicle_no}</td>
                     <td>{pkg.route_id}</td>
+                    <td>{pkg.company_route_id || ''}</td>
                     <td>{pkg.route_name}</td>
                     <td>{driver?.name || ''}</td>
                     <td>{pkg.no_of_days}</td>
