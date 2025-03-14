@@ -445,12 +445,14 @@ app.get('/api/packages', async (req, res) => {
         c.name as company_name,
         s.name as supervisor_name,
         d.name as driver_name,
-        v.licensePlate as vehicle_no
+        v.licensePlate as vehicle_no,
+        mr.company_route_id
       FROM packages p
       LEFT JOIN companies c ON p.company_id = c.id
       LEFT JOIN staff s ON p.supervisor_id = s.id
       LEFT JOIN drivers d ON p.driver_id = d.id
       LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
+      LEFT JOIN main_route mr ON p.route_id = mr.route_id
       ORDER BY p.id DESC
     `);
     res.json(rows);
@@ -467,6 +469,17 @@ app.post('/api/packages', async (req, res) => {
     await connection.beginTransaction();
 
     const package = req.body;
+    
+    // Get company_route_id from main_route table
+    const [routeData] = await connection.query(
+      'SELECT company_route_id FROM main_route WHERE route_id = ?',
+      [package.route_id]
+    );
+
+    if (routeData.length > 0) {
+      package.company_route_id = routeData[0].company_route_id;
+    }
+
     const [result] = await connection.query('INSERT INTO packages SET ?', package);
     
     // Fetch the newly created package with related data
@@ -476,12 +489,14 @@ app.post('/api/packages', async (req, res) => {
         c.name as company_name,
         s.name as supervisor_name,
         d.name as driver_name,
-        v.licensePlate as vehicle_no
+        v.licensePlate as vehicle_no,
+        mr.company_route_id
       FROM packages p
       LEFT JOIN companies c ON p.company_id = c.id
       LEFT JOIN staff s ON p.supervisor_id = s.id
       LEFT JOIN drivers d ON p.driver_id = d.id
       LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
+      LEFT JOIN main_route mr ON p.route_id = mr.route_id
       WHERE p.id = ?
     `, [result.insertId]);
 
