@@ -3,11 +3,13 @@ import axios from 'axios';
 import './AddPackageModal.css';
 
 const AddPackageModal = ({ show, onClose, onAdd }) => {
+  // Update formData state to include route_total_kms
   const [formData, setFormData] = useState({
     partner_id: '',
     vehicle_no: '',
     route_id: '',
     route_name: '',
+    route_total_kms: '',  // Add this line
     driver_id: '',
     no_of_days: '',
     monthly_kms: '',
@@ -210,6 +212,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                 </select>
               </div>
 
+              
               <div className="form-group">
                 <label>Route ID</label>
                 <select 
@@ -221,7 +224,9 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                       setFormData(prev => ({
                         ...prev,
                         route_id: e.target.value,
-                        route_name: selectedRoute.route_name
+                        route_name: selectedRoute.route_name,
+                        route_total_kms: selectedRoute.route_total_kms,
+                        monthly_kms: selectedRoute.route_total_kms * 30  // Optional: Auto-calculate monthly kms
                       }));
                     }
                   }}
@@ -237,6 +242,17 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                 </select>
               </div>
 
+              
+              <div className="form-group">
+                <label>Route Total Kms</label>
+                <input 
+                  type="text" 
+                  name="route_total_kms" 
+                  value={formData.route_total_kms} 
+                  readOnly 
+                  required 
+                />
+              </div>
               <div className="form-group">
                 <label>Route Name</label>
                 <input 
