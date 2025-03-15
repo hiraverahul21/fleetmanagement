@@ -76,6 +76,7 @@ const PackageList = () => {
                 <th>Route ID</th>
                 <th>Company Route ID</th>
                 <th>Route Name</th>
+                <th>Route Total Kms</th>
                 <th>Driver Name</th>
                 <th>Shift</th>
                 <th>No of Days</th>
@@ -106,7 +107,6 @@ const PackageList = () => {
                     <td>{pkg.vehicle_no}</td>
                     <td>{pkg.route_id}</td>
                     <td>{pkg.company_route_id || ''}</td>
-                    
                     <td 
                       title={(() => {
                         const stops = routeStops.filter(stop => stop.route_id === parseInt(pkg.route_id))
@@ -117,6 +117,7 @@ const PackageList = () => {
                     >
                       {pkg.route_name}
                     </td>
+                    <td>{pkg.route_total_kms}</td>
                     <td>{driver?.name || ''}</td>
                     <td>{pkg.shift}</td>
                     <td>{pkg.no_of_days}</td>

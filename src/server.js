@@ -464,19 +464,26 @@ app.post('/api/packages', async (req, res) => {
 
     const package = req.body;
     
-    // Get company_route_id from main_route table
+    // Get route data including route_total_kms
     const [routeData] = await connection.query(
-      'SELECT company_route_id FROM main_route WHERE route_id = ?',
+      'SELECT company_route_id, route_total_kms FROM main_route WHERE route_id = ?',
       [package.route_id]
     );
 
     if (routeData.length > 0) {
       package.company_route_id = routeData[0].company_route_id;
+      package.route_total_kms = routeData[0].route_total_kms;
+
+      // Calculate monthly_kms based on route_total_kms
+      if (package.shift && package.no_of_days) {
+        package.monthly_kms = routeData[0].route_total_kms * package.shift * package.no_of_days;
+      }
     }
 
+    // Insert package with route_total_kms
     const [result] = await connection.query('INSERT INTO packages SET ?', package);
     
-    // Fetch the newly created package with related data
+    // Update the SELECT query to include route_total_kms
     const [newPackage] = await connection.query(`
       SELECT 
         p.*,
@@ -484,7 +491,8 @@ app.post('/api/packages', async (req, res) => {
         s.name as supervisor_name,
         d.name as driver_name,
         v.licensePlate as vehicle_no,
-        mr.company_route_id
+        mr.company_route_id,
+        mr.route_total_kms
       FROM packages p
       LEFT JOIN companies c ON p.company_id = c.id
       LEFT JOIN staff s ON p.supervisor_id = s.id
@@ -514,6 +522,32 @@ app.post('/api/packages', async (req, res) => {
     if (connection) {
       connection.release();
     }
+  }
+});
+
+// Update the GET packages endpoint to include route_total_kms
+app.get('/api/packages', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        p.*,
+        c.name as company_name,
+        s.name as supervisor_name,
+        d.name as driver_name,
+        v.licensePlate as vehicle_no,
+        mr.company_route_id,
+        mr.route_total_kms
+      FROM packages p
+      LEFT JOIN companies c ON p.company_id = c.id
+      LEFT JOIN staff s ON p.supervisor_id = s.id
+      LEFT JOIN drivers d ON p.driver_id = d.id
+      LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
+      LEFT JOIN main_route mr ON p.route_id = mr.route_id
+      ORDER BY p.id DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
