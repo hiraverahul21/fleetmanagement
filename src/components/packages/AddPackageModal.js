@@ -102,14 +102,29 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-      ...(name === 'partner_id' && { vehicle_no: '' }),
-      ...(name === 'no_of_days' && { 
-        monthly_kms: prevState.route_total_kms ? (parseFloat(prevState.route_total_kms) * parseFloat(value)) : ''
-      })
-    }));
+    setFormData(prevState => {
+      const newState = {
+        ...prevState,
+        [name]: value
+      };
+
+      // Reset vehicle_no when partner changes
+      if (name === 'partner_id') {
+        newState.vehicle_no = '';
+      }
+
+      // Calculate monthly_kms when shift or no_of_days changes
+      if ((name === 'shift' || name === 'no_of_days') && prevState.route_total_kms) {
+        const shift = name === 'shift' ? parseFloat(value) : parseFloat(prevState.shift);
+        const days = name === 'no_of_days' ? parseFloat(value) : parseFloat(prevState.no_of_days);
+        
+        if (shift && days) {
+          newState.monthly_kms = (shift * days * parseFloat(prevState.route_total_kms)).toString();
+        }
+      }
+
+      return newState;
+    });
   };
 
   // Add after getFilteredVehicles function and before if (!show) return null;
