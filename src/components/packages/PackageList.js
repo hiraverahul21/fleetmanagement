@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './PackageList.css';
 import AddPackageModal from './AddPackageModal';
+import EditPackageModal from './EditPackageModal';
 
 const PackageList = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const PackageList = () => {
   const [partners, setPartners] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [routeStops, setRouteStops] = useState([]);
+  const [editingPackage, setEditingPackage] = useState(null);
 
   useEffect(() => {
     document.body.style.paddingLeft = '250px';
@@ -49,8 +51,10 @@ const PackageList = () => {
     setShowModal(true);
   };
 
+  // Remove the first handleModalClose and keep this updated version
   const handleModalClose = () => {
     setShowModal(false);
+    setEditingPackage(null);  // Reset editingPackage when modal closes
   };
 
   const handlePackageAdded = async (newPackage) => {
@@ -58,6 +62,19 @@ const PackageList = () => {
     handleModalClose();
   };
 
+  const handleEditSubmit = async (updatedPackage) => {
+    await fetchData();
+    handleModalClose();
+  };
+
+  const handleEditClick = (pkg) => {
+    setEditingPackage(pkg);
+    setShowModal(true);
+  };
+
+  // Remove the duplicate handleModalClose that was here
+  
+  // Update the edit button in the table
   return (
     <div className="package-list-container">
       <div className="package-header">
@@ -133,7 +150,10 @@ const PackageList = () => {
                     <td>{pkg.diesel_status}</td>
                     <td>{supervisor?.name || ''}</td>
                     <td>
-                      <button className="action-btn edit">
+                      <button 
+                        className="action-btn edit"
+                        onClick={() => handleEditClick(pkg)}
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
                       <button className="action-btn delete">
@@ -147,10 +167,24 @@ const PackageList = () => {
           </table>
         </div>
       </div>
+      <EditPackageModal 
+        show={showModal && editingPackage !== null}
+        onClose={handleModalClose}
+        onEdit={handleEditSubmit}
+        editPackage={editingPackage}
+        companies={companies}
+        supervisors={supervisors}
+        drivers={drivers}
+        partners={partners}
+      />
       <AddPackageModal 
-        show={showModal}
+        show={showModal && editingPackage === null}
         onClose={handleModalClose}
         onAdd={handlePackageAdded}
+        companies={companies}
+        supervisors={supervisors}
+        drivers={drivers}
+        partners={partners}
       />
     </div>
   );
