@@ -20,17 +20,11 @@ app.get('/api/routes', async (req, res) => {
 
 app.get('/api/route-stops', async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT 
-        *,
-        TIME_FORMAT(start_time, '%H:%i') as start_time,
-        TIME_FORMAT(end_time, '%H:%i') as end_time 
-      FROM route_stops 
-      ORDER BY route_id, stop_srno
-    `);
+    const [rows] = await db.query('SELECT * FROM fleet.route_stops ORDER BY route_id, stop_srno');
     res.json(rows);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching route stops:', error);
+    res.status(500).json({ error: 'Failed to fetch route stops' });
   }
 });
 

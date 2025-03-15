@@ -12,6 +12,7 @@ const PackageList = () => {
   const [drivers, setDrivers] = useState([]);
   const [partners, setPartners] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [routeStops, setRouteStops] = useState([]);
 
   useEffect(() => {
     document.body.style.paddingLeft = '250px';
@@ -20,12 +21,13 @@ const PackageList = () => {
 
   const fetchData = async () => {
     try {
-      const [packagesRes, companiesRes, supervisorsRes, driversRes, partnersRes] = await Promise.all([
+      const [packagesRes, companiesRes, supervisorsRes, driversRes, partnersRes, routeStopsRes] = await Promise.all([
         axios.get('http://localhost:5000/api/packages'),
         axios.get('http://localhost:5000/api/companies'),
         axios.get('http://localhost:5000/api/staff'),
         axios.get('http://localhost:5000/api/drivers'),
-        axios.get('http://localhost:5000/api/partners')
+        axios.get('http://localhost:5000/api/partners'),
+        axios.get('http://localhost:5000/api/route-stops')  // New endpoint for route stops
       ]);
 
       setPackages(packagesRes.data);
@@ -33,6 +35,7 @@ const PackageList = () => {
       setSupervisors(supervisorsRes.data);
       setDrivers(driversRes.data);
       setPartners(partnersRes.data);
+      setRouteStops(routeStopsRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -99,7 +102,17 @@ const PackageList = () => {
                     <td>{pkg.vehicle_no}</td>
                     <td>{pkg.route_id}</td>
                     <td>{pkg.company_route_id || ''}</td>
-                    <td>{pkg.route_name}</td>
+                    
+                    <td 
+                      title={(() => {
+                        const stops = routeStops.filter(stop => stop.route_id === parseInt(pkg.route_id))
+                          .map(stop => `${stop.stop_srno}. ${stop.start_from} → ${stop.end_to} (${stop.stop_kms}km)`);
+                        return stops.length ? stops.join('\n') : 'No stops available';
+                      })()}
+                      style={{ cursor: 'help' }}
+                    >
+                      {pkg.route_name}
+                    </td>
                     <td>{driver?.name || ''}</td>
                     <td>{pkg.shift}</td>
                     <td>{pkg.no_of_days}</td>
