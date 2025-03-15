@@ -315,7 +315,16 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
 
               <div className="form-group">
                 <label>Actual Kms</label>
-                <input type="number" name="actual_kms" value={formData.actual_kms} onChange={handleChange} />
+                <input 
+                  type="number" 
+                  name="actual_kms" 
+                  value={formData.actual_kms} 
+                  onChange={handleChange}
+                  min="0.01"
+                  step="0.01"
+                  required 
+                  placeholder="Enter actual kilometers"
+                />
               </div>
             </div>
 
