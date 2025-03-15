@@ -94,10 +94,23 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
   // Update handleChange to handle all form inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      };
+
+      // Update monthly_kms when shift or no_of_days changes
+      if (name === 'shift' || name === 'no_of_days') {
+        if (newData.route_total_kms && newData.shift && newData.no_of_days) {
+          newData.monthly_kms = parseFloat(newData.route_total_kms) * 
+                               parseInt(newData.shift) * 
+                               parseInt(newData.no_of_days);
+        }
+      }
+
+      return newData;
+    });
   };
 
   // Add handleRouteChange for route selection
