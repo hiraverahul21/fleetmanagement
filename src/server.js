@@ -551,11 +551,13 @@ app.get('/api/packages', async (req, res) => {
   }
 });
 
+// Add this with your other API endpoints
 app.get('/api/companies', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM companies WHERE status = "active"');
+    const [rows] = await db.query('SELECT * FROM companies ORDER BY id DESC');
     res.json(rows);
   } catch (error) {
+    console.error('Error fetching companies:', error);
     res.status(500).json({ error: error.message });
   }
 });

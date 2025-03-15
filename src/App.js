@@ -11,6 +11,7 @@ import AddPartner from './components/partners/AddPartner';
 import PackageList from './components/packages/PackageList';
 import RouteList from './components/routes/RouteList';
 import AddRoute from './components/routes/AddRoute';
+import CompaniesList from './components/companies/CompaniesList';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="packages/list" element={<PackageList />} />
           <Route path="routes/list" element={<RouteList />} />
           <Route path="routes/add" element={<AddRoute />} />
+          <Route path="companies/list" element={<CompaniesList />} />
         </Route>
       </Routes>
     </BrowserRouter>

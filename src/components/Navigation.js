@@ -54,17 +54,23 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'route-list', label: 'Route List', icon: 'list' }
       ]
     },
+    { 
+      id: 'companies', 
+      icon: 'building', 
+      label: 'Companies',
+      submenu: [
+        { id: 'add-company', label: 'Add Company', icon: 'plus' },
+        { id: 'company-list', label: 'Company List', icon: 'list' }
+      ]
+    },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
-  // Update handleSubmenuClick to handle partner routes
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
     e.stopPropagation();
     if (parentItem.id === 'routes' && submenuItem.id === 'add-route') {
-      // Keep sidebar state and navigate
       navigate('/dashboard/routes/add');
     } else {
-      // Existing navigation logic for other items
       setIsOpen(false);
       if (parentItem.id === 'vehicles') {
         if (submenuItem.id === 'add-vehicle') {
@@ -90,13 +96,15 @@ const Navigation = ({ onMenuSelect }) => {
         if (submenuItem.id === 'route-list') {
           navigate('/dashboard/routes/list');
         }
+      } else if (parentItem.id === 'companies') {
+        if (submenuItem.id === 'company-list') {
+          navigate('/dashboard/companies/list');
+        }
       }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
   
-  // Update handleMenuClick to handle partner menu
-  // Update handleMenuClick to handle all menu items and maintain margin
   const handleMenuClick = (menuItem) => {
     if (menuItem.id === 'overview') {
       navigate('/dashboard');
@@ -108,6 +116,8 @@ const Navigation = ({ onMenuSelect }) => {
       navigate('/dashboard/packages/list');
     } else if (menuItem.id === 'routes') {
       navigate('/dashboard/routes/list');
+    } else if (menuItem.id === 'companies') {
+      navigate('/dashboard/companies/list');
     }
     onMenuSelect(menuItem, true);
   };
