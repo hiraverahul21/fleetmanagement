@@ -70,9 +70,12 @@ const PackageList = () => {
                 <th>Company Route ID</th>
                 <th>Route Name</th>
                 <th>Driver Name</th>
+                <th>Shift</th>
                 <th>No of Days</th>
                 <th>Monthly Kms</th>
                 <th>Actual Kms</th>
+                <th>Kms(+/-)</th>
+                <th>Diff %(+/-)</th>
                 <th>Company Allocated</th>
                 <th>Diesel Status</th>
                 <th>Supervisor Name</th>
@@ -86,6 +89,10 @@ const PackageList = () => {
                 const driver = drivers.find(d => d.id === pkg.driver_id);
                 const partner = partners.find(p => p.id === pkg.partner_id);
 
+                // Calculate differences
+                const kmsDiff = pkg.actual_kms - pkg.monthly_kms;
+                const diffPercentage = ((pkg.actual_kms * 100 / pkg.monthly_kms) - 100).toFixed(2);
+
                 return (
                   <tr key={pkg.id}>
                     <td>{partner?.name || ''}</td>
@@ -94,9 +101,16 @@ const PackageList = () => {
                     <td>{pkg.company_route_id || ''}</td>
                     <td>{pkg.route_name}</td>
                     <td>{driver?.name || ''}</td>
+                    <td>{pkg.shift}</td>
                     <td>{pkg.no_of_days}</td>
                     <td>{pkg.monthly_kms}</td>
                     <td>{pkg.actual_kms}</td>
+                    <td style={{ color: kmsDiff > 0 ? 'red' : 'black' }}>
+                      {kmsDiff}
+                    </td>
+                    <td style={{ color: diffPercentage > 0 ? 'red' : 'black' }}>
+                      {diffPercentage}%
+                    </td>
                     <td>{company?.name || ''}</td>
                     <td>{pkg.diesel_status}</td>
                     <td>{supervisor?.name || ''}</td>
