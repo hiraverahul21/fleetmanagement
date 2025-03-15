@@ -114,6 +114,45 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const updatedData = {
+        ...formData,
+        id: editPackage.id,
+        route_id: parseInt(formData.route_id),
+        partner_id: parseInt(formData.partner_id),
+        driver_id: parseInt(formData.driver_id),
+        supervisor_id: parseInt(formData.supervisor_id),
+        company_id: parseInt(formData.company_id),
+        no_of_days: parseInt(formData.no_of_days),
+        monthly_kms: parseFloat(formData.monthly_kms),
+        actual_kms: parseFloat(formData.actual_kms),
+        route_total_kms: parseFloat(formData.route_total_kms)
+      };
+
+      // Updated URL to use plural form 'packages'
+      const response = await axios({
+        method: 'put',
+        url: `http://localhost:5000/api/packages/${editPackage.id}`,
+        data: updatedData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data) {
+        onEdit(response.data);
+        onClose();
+      } else {
+        throw new Error('No data received from server');
+      }
+    } catch (error) {
+      console.error('Error updating package:', error.response?.data || error.message);
+      alert(`Failed to update package: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
   // Update form JSX to match AddPackageModal structure
   return (
     show && (
@@ -279,16 +318,3 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
 };
 
 export default EditPackageModal;
-
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    await axios.put(`http://localhost:5000/api/packages/${editPackage.id}`, formData);
-    onEdit(formData);
-    onClose();
-  } catch (error) {
-    console.error('Error updating package:', error);
-    alert('Failed to update package');
-  }
-};
