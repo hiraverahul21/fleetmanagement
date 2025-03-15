@@ -75,6 +75,20 @@ const PackageList = () => {
   // Remove the duplicate handleModalClose that was here
   
   // Update the edit button in the table
+  // Add this function before the return statement
+  const getVehicleCount = (vehicleNo) => {
+    return packages.filter(pkg => pkg.vehicle_no === vehicleNo).length;
+  };
+
+  // Add this function to determine row background color
+  const getRowBackgroundColor = (vehicleNo) => {
+    const count = getVehicleCount(vehicleNo);
+    if (count > 3) return '#ffcccc'; // dark red
+    if (count > 2) return '#ffb3b3'; // light red
+    if (count > 1) return '#ffffd1'; // light yellow
+    return ''; // default background
+  };
+
   return (
     <div className="package-list-container">
       <div className="package-header">
@@ -119,7 +133,10 @@ const PackageList = () => {
                 const diffPercentage = ((pkg.actual_kms * 100 / pkg.monthly_kms) - 100).toFixed(2);
 
                 return (
-                  <tr key={pkg.id}>
+                  <tr 
+                    key={pkg.id}
+                    style={{ backgroundColor: getRowBackgroundColor(pkg.vehicle_no) }}
+                  >
                     <td>{partner?.name || ''}</td>
                     <td>{pkg.vehicle_no}</td>
                     <td>{pkg.route_id}</td>
