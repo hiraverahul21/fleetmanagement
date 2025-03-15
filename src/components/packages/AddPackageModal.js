@@ -4,12 +4,14 @@ import './AddPackageModal.css';
 
 const AddPackageModal = ({ show, onClose, onAdd }) => {
   // Update formData state to include route_total_kms
+  // Update initial formData state to include shift
   const [formData, setFormData] = useState({
     partner_id: '',
     vehicle_no: '',
     route_id: '',
     route_name: '',
-    route_total_kms: '',  // Add this line
+    route_total_kms: '',
+    shift: '',  // Add this line
     driver_id: '',
     no_of_days: '',
     monthly_kms: '',
@@ -260,6 +262,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                   required 
                 />
               </div>
+              
               <div className="form-group">
                 <label>Route Name</label>
                 <input 
@@ -269,6 +272,21 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                   readOnly 
                   required 
                 />
+              </div>
+              <div className="form-group">
+                <label>Shift</label>
+                <select 
+                  name="shift" 
+                  value={formData.shift} 
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Shift</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
               </div>
               <div className="form-group">
                 <label>No of Days</label>
