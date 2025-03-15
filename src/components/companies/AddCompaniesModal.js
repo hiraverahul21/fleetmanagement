@@ -1,24 +1,36 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './AddCompaniesModal.css';
 
 const AddCompaniesModal = ({ show, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
-    contact_person: '',
-    email: '',
-    phone: '',
-    address: '',
     status: 'active'
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Add your API call here
-      onAdd(formData);
-      onClose();
+      console.log('Submitting company data:', formData); // Debug log
+
+      const response = await axios.post('http://localhost:5000/api/companies', {
+        name: formData.name.trim(),
+        status: formData.status
+      });
+
+      console.log('Server response:', response.data); // Debug log
+
+      if (response.data) {
+        onAdd(response.data);
+        setFormData({
+          name: '',
+          status: 'active'
+        });
+        onClose();
+      }
     } catch (error) {
-      console.error('Error adding company:', error);
+      console.error('Detailed error:', error.response || error); // Enhanced error logging
+      alert(error.response?.data?.message || 'Failed to add company. Please try again.');
     }
   };
 
@@ -39,37 +51,6 @@ const AddCompaniesModal = ({ show, onClose, onAdd }) => {
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               required
-            />
-          </div>
-          <div className="form-group">
-            <label>Contact Person</label>
-            <input
-              type="text"
-              value={formData.contact_person}
-              onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Phone</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Address</label>
-            <textarea
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
             />
           </div>
           <div className="form-group">

@@ -551,7 +551,7 @@ app.get('/api/packages', async (req, res) => {
   }
 });
 
-// Add this with your other API endpoints
+// Add or update the companies endpoints
 app.get('/api/companies', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM companies ORDER BY id DESC');
@@ -559,6 +559,41 @@ app.get('/api/companies', async (req, res) => {
   } catch (error) {
     console.error('Error fetching companies:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Add this near the top of your file, after other middleware
+app.use(express.json());
+app.use(cors());
+
+// Update or add the companies POST endpoint
+app.post('/api/companies', async (req, res) => {
+  try {
+    console.log('Received company data:', req.body); // Debug log
+    const { name, status } = req.body;
+
+    const [result] = await db.query(
+      'INSERT INTO companies (name, status) VALUES (?, ?)',
+      [name, status]
+    );
+
+    if (result.affectedRows > 0) {
+      const [newCompany] = await db.query(
+        'SELECT * FROM companies WHERE id = ?',
+        [result.insertId]
+      );
+      console.log('Created company:', newCompany[0]); // Debug log
+      res.status(201).json(newCompany[0]);
+    } else {
+      throw new Error('Failed to create company');
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to create company',
+      error: error.message 
+    });
   }
 });
 
