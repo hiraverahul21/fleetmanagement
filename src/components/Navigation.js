@@ -8,6 +8,7 @@ import {
   BoxPlotOutlined,
   EnvironmentOutlined
 } from '@ant-design/icons';
+import AddCompaniesModal from './companies/AddCompaniesModal';
 
 const Navigation = ({ onMenuSelect }) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -66,8 +67,16 @@ const Navigation = ({ onMenuSelect }) => {
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
+  // Add state for modal
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  
+  // Update handleSubmenuClick function
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
     e.stopPropagation();
+    if (parentItem.id === 'companies' && submenuItem.id === 'add-company') {
+      setShowAddCompanyModal(true);
+      return;
+    }
     if (parentItem.id === 'routes' && submenuItem.id === 'add-route') {
       navigate('/dashboard/routes/add');
     } else {
@@ -133,6 +142,7 @@ const Navigation = ({ onMenuSelect }) => {
     document.body.style.transition = 'padding-left 0.3s ease';
   };
   
+  // Make sure the modal is rendered in the return statement
   return (
     <>
       <div className={`nav-sidebar ${!isOpen ? 'collapsed' : ''}`}>
@@ -211,6 +221,14 @@ const Navigation = ({ onMenuSelect }) => {
           </button>
         </div>
       )}
+      <AddCompaniesModal 
+        show={showAddCompanyModal}
+        onClose={() => setShowAddCompanyModal(false)}
+        onAdd={(newCompany) => {
+          setShowAddCompanyModal(false);
+          // Handle the newly added company if needed
+        }}
+      />
     </>
   );
 };
