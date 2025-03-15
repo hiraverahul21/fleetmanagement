@@ -111,64 +111,40 @@ const RouteList = () => {
   };
 
   const handleEditRoute = async (values) => {
-    try {
-      setLoading(true);
-      const totalKms = values.stops.reduce((sum, stop) => sum + Number(stop.stop_kms), 0);
-      
-      const companyId = Number(values.company_id);
-      const routeId = Number(selectedRoute.route_id);
-
-      // Create update payload with both main route and stops
-      const updatePayload = {
-        mainRoute: {
-          route_id: routeId,
-          company_id: companyId,
-          company_route_id: values.company_route_id,
-          route_name: `${values.route_from} - ${values.route_to}`,
-          route_from: values.route_from,
-          route_to: values.route_to,
-          route_total_kms: Number(totalKms),
-          status: values.status
-        },
-        stops: values.stops.map((stop, index) => ({
-          route_id: routeId,
-          stop_srno: index + 1,
-          start_from: stop.start_from,
-          end_to: stop.end_to,
-          stop_kms: Number(stop.stop_kms).toFixed(2),
-          start_time: stop.start_time?.format('HH:mm:ss'),
-          end_time: stop.end_time?.format('HH:mm:ss')
-        }))
-      };
-
-      // Use the original update endpoint
-      const response = await axios.put(
-        `http://localhost:5000/api/routes/${routeId}`,
-        updatePayload,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (response.data.message === 'Route updated successfully') {
-        await fetchRouteData();
+      try {
+        const totalKms = values.stops.reduce((sum, stop) => sum + Number(stop.stop_kms), 0);
+        
+        const routeData = {
+          mainRoute: {
+            company_id: values.company_id,
+            company_route_id: values.company_route_id,
+            route_name: `${values.route_from} - ${values.route_to}`,
+            route_from: values.route_from,
+            route_to: values.route_to,
+            route_total_kms: totalKms,
+            status: values.status || 'active'
+          },
+          stops: values.stops.map((stop, index) => ({
+            ...stop,
+            stop_srno: index + 1,
+            start_time: stop.start_time?.format('HH:mm:ss'),
+            end_time: stop.end_time?.format('HH:mm:ss')
+          }))
+        };
+  
+        await axios.put(`http://localhost:5000/api/routes/${selectedRoute.route_id}`, routeData);
+        
         message.success('Route updated successfully');
         setIsModalVisible(false);
         setIsEditMode(false);
         setSelectedRoute(null);
         form.resetFields();
-      } else {
-        throw new Error('Update failed');
+        fetchRouteData();
+      } catch (error) {
+        console.error('Update error:', error);
+        message.error('Failed to update route');
       }
-    } catch (error) {
-      console.error('Update error:', error);
-      message.error(`Failed to update route: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   const mainColumns = [
     {
