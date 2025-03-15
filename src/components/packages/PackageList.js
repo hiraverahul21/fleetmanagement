@@ -21,13 +21,17 @@ const PackageList = () => {
 
   const fetchData = async () => {
     try {
+      // First, check and update packages based on main_route changes
+      await axios.post('http://localhost:5000/api/packages/recalculate');
+
+      // Then fetch all the updated data
       const [packagesRes, companiesRes, supervisorsRes, driversRes, partnersRes, routeStopsRes] = await Promise.all([
         axios.get('http://localhost:5000/api/packages'),
         axios.get('http://localhost:5000/api/companies'),
         axios.get('http://localhost:5000/api/staff'),
         axios.get('http://localhost:5000/api/drivers'),
         axios.get('http://localhost:5000/api/partners'),
-        axios.get('http://localhost:5000/api/route-stops')  // New endpoint for route stops
+        axios.get('http://localhost:5000/api/route-stops')
       ]);
 
       setPackages(packagesRes.data);

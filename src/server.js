@@ -667,3 +667,30 @@ app.put('/api/routes/:id', async (req, res) => {
     }
   }
 });
+
+app.post('/api/packages/recalculate', async (req, res) => {
+  try {
+    // Get all packages with their routes
+    const [packages] = await db.query(`
+      SELECT p.*, r.route_total_kms 
+      FROM packages p
+      JOIN main_route r ON p.route_id = r.route_id
+    `);
+
+    // Update each package with recalculated values
+    for (const pkg of packages) {
+      const monthlyKms = pkg.route_total_kms * pkg.shift * pkg.no_of_days;
+      
+      await db.query(`
+        UPDATE packages 
+        SET monthly_kms = ?
+        WHERE id = ?
+      `, [monthlyKms, pkg.id]);
+    }
+
+    res.json({ success: true, message: 'Packages recalculated successfully' });
+  } catch (error) {
+    console.error('Error recalculating packages:', error);
+    res.status(500).json({ error: 'Failed to recalculate packages' });
+  }
+});
