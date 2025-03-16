@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './CompaniesList.css';
+import AddCompaniesModal from './AddCompaniesModal';
 
 const CompaniesList = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     fetchCompanies();
@@ -21,11 +23,15 @@ const CompaniesList = () => {
     }
   };
 
+  const handleAddCompany = (newCompany) => {
+    setCompanies([...companies, newCompany]);
+  };
+
   return (
     <div className="companies-container">
       <div className="companies-header">
         <h2>Companies Management</h2>
-        <button className="add-company-btn">
+        <button className="add-company-btn" onClick={() => setShowAddModal(true)}>
           <i className="fas fa-plus"></i> Add Company
         </button>
       </div>
@@ -66,6 +72,11 @@ const CompaniesList = () => {
           </tbody>
         </table>
       </div>
+      <AddCompaniesModal 
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddCompany}
+      />
     </div>
   );
 };
