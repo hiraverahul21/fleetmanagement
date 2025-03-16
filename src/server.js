@@ -475,8 +475,8 @@ app.post('/api/packages', async (req, res) => {
       package.route_total_kms = routeData[0].route_total_kms;
 
       // Calculate monthly_kms based on route_total_kms
-      if (package.shift && package.no_of_days) {
-        package.monthly_kms = routeData[0].route_total_kms * package.shift * package.no_of_days;
+      if (package.trips_per_day && package.no_of_days) {
+        package.monthly_kms = routeData[0].route_total_kms * package.trips_per_day * package.no_of_days;
       }
     }
 
@@ -750,7 +750,7 @@ app.post('/api/packages/recalculate', async (req, res) => {
 
     // Update each package with recalculated values
     for (const pkg of packages) {
-      const monthlyKms = pkg.route_total_kms * pkg.shift * pkg.no_of_days;
+      const monthlyKms = pkg.route_total_kms * pkg.trips_per_day * pkg.no_of_days;
       
       await db.query(`
         UPDATE packages 
@@ -900,7 +900,7 @@ app.post('/api/packages/recalculate', async (req, res) => {
 
     // Update each package with recalculated values
     for (const pkg of packages) {
-      const monthlyKms = pkg.route_total_kms * pkg.shift * pkg.no_of_days;
+      const monthlyKms = pkg.route_total_kms * pkg.trips_per_day * pkg.no_of_days;
       
       await db.query(`
         UPDATE packages 

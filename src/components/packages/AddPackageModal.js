@@ -5,13 +5,14 @@ import './AddPackageModal.css';
 const AddPackageModal = ({ show, onClose, onAdd }) => {
   // Update formData state to include route_total_kms
   // Update initial formData state to include shift
+  // Add shift to initial state
   const [formData, setFormData] = useState({
     partner_id: '',
     vehicle_no: '',
     route_id: '',
     route_name: '',
     route_total_kms: '',
-    shift: '',  // Add this line
+    shift: '',  // Add shift field
     driver_id: '',
     no_of_days: '',
     monthly_kms: '',
@@ -151,6 +152,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
           company_id: '',
           diesel_status: 'Self',
           supervisor_id: ''
+          // removed shift from reset
         });
       }
     } catch (error) {
@@ -278,6 +280,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                 />
               </div>
               
+             
               <div className="form-group">
                 <label>Route Name</label>
                 <input 
@@ -288,14 +291,10 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                   required 
                 />
               </div>
+              
               <div className="form-group">
                 <label>Shift</label>
-                <select 
-                  name="shift" 
-                  value={formData.shift} 
-                  onChange={handleChange}
-                  required
-                >
+                <select name="shift" value={formData.shift} onChange={handleChange} required>
                   <option value="">Select Shift</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
@@ -303,6 +302,7 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                   <option value="4">4</option>
                 </select>
               </div>
+              
               <div className="form-group">
                 <label>No of Trips per Day</label>
                 <input 
