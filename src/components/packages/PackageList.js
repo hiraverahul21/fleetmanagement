@@ -23,10 +23,7 @@ const PackageList = () => {
 
   const fetchData = async () => {
     try {
-      // First, check and update packages based on main_route changes
-      await axios.post('http://localhost:5000/api/packages/recalculate');
-
-      // Then fetch all the updated data
+      // Remove recalculation and directly fetch the data
       const [packagesRes, companiesRes, supervisorsRes, driversRes, partnersRes, routeStopsRes] = await Promise.all([
         axios.get('http://localhost:5000/api/packages'),
         axios.get('http://localhost:5000/api/companies'),
@@ -110,6 +107,7 @@ const PackageList = () => {
                 <th>Route Total Kms</th>
                 <th>Driver Name</th>
                 <th>Shift</th>
+                <th>No of Trips per Day</th>
                 <th>No of Days</th>
                 <th>Monthly Kms</th>
                 <th>Actual Kms</th>
@@ -154,6 +152,7 @@ const PackageList = () => {
                     <td>{pkg.route_total_kms}</td>
                     <td>{driver?.name || ''}</td>
                     <td>{pkg.shift}</td>
+                    <td>{pkg.trips_per_day}</td>
                     <td>{pkg.no_of_days}</td>
                     <td>{pkg.monthly_kms}</td>
                     <td>{pkg.actual_kms}</td>
