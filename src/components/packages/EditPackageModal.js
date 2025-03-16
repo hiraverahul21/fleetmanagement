@@ -3,6 +3,7 @@ import axios from 'axios';
 import './AddPackageModal.css';
 
 const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, supervisors, drivers, partners }) => {
+  // Add trips_per_day to initial state
   const [formData, setFormData] = useState({
     partner_id: '',
     vehicle_no: '',
@@ -10,6 +11,7 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
     route_name: '',
     route_total_kms: '',
     shift: '',
+    trips_per_day: '',  // Add this line
     driver_id: '',
     no_of_days: '',
     monthly_kms: '',
@@ -33,6 +35,7 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
         route_total_kms: editPackage.route_total_kms || '',
         driver_id: editPackage.driver_id || '',
         shift: editPackage.shift || '',
+        trips_per_day: editPackage.trips_per_day || '',  // Add this line
         no_of_days: editPackage.no_of_days || '',
         monthly_kms: editPackage.monthly_kms || '',
         actual_kms: editPackage.actual_kms || '',
@@ -292,6 +295,19 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
                     <option value="3">3</option>
                     <option value="4">4</option>
                   </select>
+                </div>
+
+                <div className="form-group">
+                  <label>No of Trips per Day</label>
+                  <input 
+                    type="number" 
+                    name="trips_per_day" 
+                    value={formData.trips_per_day} 
+                    onChange={handleChange}
+                    min="1"
+                    required 
+                    placeholder="Enter number of trips"
+                  />
                 </div>
 
                 <div className="form-group">

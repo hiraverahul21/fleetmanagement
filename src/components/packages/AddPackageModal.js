@@ -304,6 +304,19 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
                 </select>
               </div>
               <div className="form-group">
+                <label>No of Trips per Day</label>
+                <input 
+                  type="number" 
+                  name="trips_per_day" 
+                  value={formData.trips_per_day} 
+                  onChange={handleChange}
+                  min="1"
+                  required 
+                  placeholder="Enter number of trips"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>No of Days</label>
                 <input type="number" name="no_of_days" value={formData.no_of_days} onChange={handleChange} required />
               </div>
