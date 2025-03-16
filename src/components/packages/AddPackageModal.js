@@ -113,13 +113,13 @@ const AddPackageModal = ({ show, onClose, onAdd }) => {
         newState.vehicle_no = '';
       }
 
-      // Calculate monthly_kms when shift or no_of_days changes
-      if ((name === 'shift' || name === 'no_of_days') && prevState.route_total_kms) {
-        const shift = name === 'shift' ? parseFloat(value) : parseFloat(prevState.shift);
+      // Calculate monthly_kms when trips_per_day or no_of_days changes
+      if ((name === 'trips_per_day' || name === 'no_of_days') && prevState.route_total_kms) {
+        const trips = name === 'trips_per_day' ? parseFloat(value) : parseFloat(prevState.trips_per_day);
         const days = name === 'no_of_days' ? parseFloat(value) : parseFloat(prevState.no_of_days);
         
-        if (shift && days) {
-          newState.monthly_kms = (shift * days * parseFloat(prevState.route_total_kms)).toString();
+        if (trips && days) {
+          newState.monthly_kms = (parseFloat(prevState.route_total_kms) * trips * days).toString();
         }
       }
 

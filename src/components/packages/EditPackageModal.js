@@ -97,22 +97,23 @@ const EditPackageModal = ({ show, onClose, onEdit, editPackage, companies, super
   // Update handleChange to handle all form inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => {
-      const newData = {
-        ...prev,
+    setFormData(prevState => {
+      const newState = {
+        ...prevState,
         [name]: value
       };
 
-      // Update monthly_kms when shift or no_of_days changes
-      if (name === 'shift' || name === 'no_of_days') {
-        if (newData.route_total_kms && newData.shift && newData.no_of_days) {
-          newData.monthly_kms = parseFloat(newData.route_total_kms) * 
-                               parseInt(newData.shift) * 
-                               parseInt(newData.no_of_days);
+      // Calculate monthly_kms when trips_per_day or no_of_days changes
+      if ((name === 'trips_per_day' || name === 'no_of_days') && prevState.route_total_kms) {
+        const trips = name === 'trips_per_day' ? parseFloat(value) : parseFloat(prevState.trips_per_day);
+        const days = name === 'no_of_days' ? parseFloat(value) : parseFloat(prevState.no_of_days);
+        
+        if (trips && days) {
+          newState.monthly_kms = (parseFloat(prevState.route_total_kms) * trips * days).toString();
         }
       }
 
-      return newData;
+      return newState;
     });
   };
 
