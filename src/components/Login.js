@@ -3,7 +3,7 @@ import './Login.css';
 import logo from '../assets/logo.jpeg';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,6 +24,7 @@ const Login = () => {
 
       if (data.success) {
         localStorage.setItem('user', JSON.stringify(data.user));
+        onLoginSuccess();
         navigate('/dashboard');
       } else {
         setError(data.message || 'Invalid credentials');
