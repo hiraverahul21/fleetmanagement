@@ -1007,6 +1007,7 @@ app.post('/api/diesel-receipts', async (req, res) => {
       vendor_id, 
       receipt_book_id, 
       issued_date, 
+      staff_id,  // Add this line
       receipt_from, 
       receipt_to,
       receipts_count,
@@ -1016,18 +1017,19 @@ app.post('/api/diesel-receipts', async (req, res) => {
     
     const [result] = await db.query(
       `INSERT INTO diesel_receipts 
-       (vendor_id, receipt_book_id, issued_date, receipt_from, receipt_to, 
+       (vendor_id, receipt_book_id, issued_date, staff_id, receipt_from, receipt_to, 
         receipts_count, receipts_balance, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [vendor_id, receipt_book_id, issued_date, receipt_from, receipt_to, 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [vendor_id, receipt_book_id, issued_date, staff_id, receipt_from, receipt_to, 
        receipts_count, receipts_balance, status || 'active']
     );
 
-    // Fetch the newly created receipt with vendor name
+    // Fetch the newly created receipt with vendor and staff names
     const [newReceipt] = await db.query(`
-      SELECT dr.*, dv.name as vendor_name 
+      SELECT dr.*, dv.name as vendor_name, s.name as staff_name
       FROM diesel_receipts dr
       LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      LEFT JOIN staff s ON dr.staff_id = s.id
       WHERE dr.id = ?
     `, [result.insertId]);
 

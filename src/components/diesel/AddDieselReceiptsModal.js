@@ -26,7 +26,8 @@ const AddDieselReceiptsModal = ({ show, onClose, onAdd }) => {
   const initialFormState = {
     vendor_id: '',
     receipt_book_id: '',
-    issued_date: new Date().toISOString().split('T')[0], // Set current date
+    issued_date: new Date().toISOString().split('T')[0],
+    staff_id: '', // Add this line
     receipt_from: '',
     receipt_to: '',
     receipts_count: '0',
