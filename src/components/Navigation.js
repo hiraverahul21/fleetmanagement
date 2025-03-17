@@ -64,6 +64,16 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'company-list', label: 'Company List', icon: 'list' }
       ]
     },
+    { 
+      id: 'diesel', 
+      icon: 'gas-pump', 
+      label: 'Diesel Management',
+      submenu: [
+        { id: 'diesel-vendors', label: 'Diesel Vendor', icon: 'store' },
+        { id: 'diesel-receipts', label: 'Diesel Receipts', icon: 'receipt' },
+        { id: 'diesel-allotment', label: 'Diesel Allotment', icon: 'fill-drip' }
+      ]
+    },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
@@ -111,9 +121,19 @@ const Navigation = ({ onMenuSelect }) => {
         }
       }
     }
+    if (parentItem.id === 'diesel') {
+      if (submenuItem.id === 'diesel-vendors') {
+        navigate('/dashboard/diesel/vendors');
+      } else if (submenuItem.id === 'diesel-receipts') {
+        navigate('/dashboard/diesel/receipts');
+      } else if (submenuItem.id === 'diesel-allotment') {
+        navigate('/dashboard/diesel/allotment');
+      }
+    }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
   };
   
+  // Update handleMenuClick to include diesel management
   const handleMenuClick = (menuItem) => {
     if (menuItem.id === 'overview') {
       navigate('/dashboard');
@@ -127,6 +147,8 @@ const Navigation = ({ onMenuSelect }) => {
       navigate('/dashboard/routes/list');
     } else if (menuItem.id === 'companies') {
       navigate('/dashboard/companies/list');
+    } else if (menuItem.id === 'diesel') {
+      navigate('/dashboard/diesel/vendors');
     }
     onMenuSelect(menuItem, true);
   };
