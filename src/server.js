@@ -1032,3 +1032,28 @@ app.post('/api/diesel-receipts', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Update diesel receipt
+app.put('/api/diesel-receipts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    await db.query(
+      'UPDATE diesel_receipts SET ? WHERE id = ?',
+      [updateData, id]
+    );
+
+    // Fetch the updated receipt with vendor name
+    const [updatedReceipt] = await db.query(`
+      SELECT dr.*, dv.name as vendor_name 
+      FROM diesel_receipts dr
+      LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      WHERE dr.id = ?
+    `, [id]);
+
+    res.json(updatedReceipt[0]);
+  } catch (error) {
+    console.error('Error updating diesel receipt:', error);
+    res.status(500).json({ error: error.message });
+  }
+});

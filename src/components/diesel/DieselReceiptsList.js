@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DieselReceiptsList.css';
 import AddDieselReceiptsModal from './AddDieselReceiptsModal';
+import EditDieselReceiptsModal from './EditDieselReceiptsModal';
 
 const DieselReceiptsList = () => {
   const [receipts, setReceipts] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   useEffect(() => {
     fetchReceipts();
@@ -22,6 +25,17 @@ const DieselReceiptsList = () => {
 
   const handleReceiptAdded = (newReceipt) => {
     setReceipts([...receipts, newReceipt]);
+  };
+
+  const handleEdit = (receipt) => {
+    setSelectedReceipt(receipt);
+    setShowEditModal(true);
+  };
+
+  const handleReceiptUpdated = (updatedReceipt) => {
+    setReceipts(receipts.map(receipt => 
+      receipt.id === updatedReceipt.id ? updatedReceipt : receipt
+    ));
   };
 
   return (
@@ -49,10 +63,7 @@ const DieselReceiptsList = () => {
           </thead>
           <tbody>
             {receipts.map((receipt) => (
-              <tr 
-                key={receipt.id}
-                className={`status-${receipt.status.toLowerCase()}`}
-              >
+              <tr key={receipt.id} className={`status-${receipt.status.toLowerCase()}`}>
                 <td>{receipt.vendor_name}</td>
                 <td>{receipt.receipt_book_id}</td>
                 <td>{new Date(receipt.issued_date).toLocaleDateString()}</td>
@@ -62,7 +73,10 @@ const DieselReceiptsList = () => {
                 <td>{receipt.receipts_balance}</td>
                 <td>{receipt.status}</td>
                 <td>
-                  <button className="action-btn edit">
+                  <button 
+                    className="action-btn edit"
+                    onClick={() => handleEdit(receipt)}
+                  >
                     <i className="fas fa-edit"></i>
                   </button>
                   <button className="action-btn delete">
@@ -75,9 +89,18 @@ const DieselReceiptsList = () => {
         </table>
       </div>
       <AddDieselReceiptsModal 
-        show={showModal}
-        onClose={() => setShowModal(false)}
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
         onAdd={handleReceiptAdded}
+      />
+      <EditDieselReceiptsModal
+        show={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedReceipt(null);
+        }}
+        onUpdate={handleReceiptUpdated}
+        receipt={selectedReceipt}
       />
     </div>
   );
