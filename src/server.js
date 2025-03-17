@@ -1036,7 +1036,8 @@ app.post('/api/diesel-receipts', async (req, res) => {
 app.put('/api/diesel-receipts/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    // Remove vendor_name from the update data
+    const { vendor_name, ...updateData } = req.body;
     
     await db.query(
       'UPDATE diesel_receipts SET ? WHERE id = ?',
