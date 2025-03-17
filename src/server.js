@@ -976,3 +976,59 @@ app.post('/api/packages/recalculate', async (req, res) => {
     res.status(500).json({ error: 'Failed to recalculate packages' });
   }
 });
+
+// Add these diesel receipt endpoints before app.listen()
+
+// Get all diesel receipts with vendor names
+app.get('/api/diesel-receipts', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT dr.*, dv.name as vendor_name 
+      FROM diesel_receipts dr
+      LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      ORDER BY dr.id DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching diesel receipts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new diesel receipt
+app.post('/api/diesel-receipts', async (req, res) => {
+  try {
+    const { 
+      vendor_id, 
+      receipt_book_id, 
+      issued_date, 
+      receipt_from, 
+      receipt_to,
+      receipts_count,
+      receipts_balance,
+      status 
+    } = req.body;
+    
+    const [result] = await db.query(
+      `INSERT INTO diesel_receipts 
+       (vendor_id, receipt_book_id, issued_date, receipt_from, receipt_to, 
+        receipts_count, receipts_balance, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [vendor_id, receipt_book_id, issued_date, receipt_from, receipt_to, 
+       receipts_count, receipts_balance, status || 'active']
+    );
+
+    // Fetch the newly created receipt with vendor name
+    const [newReceipt] = await db.query(`
+      SELECT dr.*, dv.name as vendor_name 
+      FROM diesel_receipts dr
+      LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      WHERE dr.id = ?
+    `, [result.insertId]);
+
+    res.status(201).json(newReceipt[0]);
+  } catch (error) {
+    console.error('Error adding diesel receipt:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
