@@ -429,7 +429,68 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Add all package-related endpoints before app.listen()
+// Add these diesel vendor endpoints before app.listen()
+
+// Get all diesel vendors
+app.get('/api/diesel-vendors', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM diesel_vendors ORDER BY id DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching diesel vendors:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new diesel vendor
+app.post('/api/diesel-vendors', async (req, res) => {
+  try {
+    const { name, address, contact_person, supply_type } = req.body;
+    
+    const [result] = await db.query(
+      'INSERT INTO diesel_vendors (name, address, contact_person, supply_type) VALUES (?, ?, ?, ?)',
+      [name, address, contact_person, supply_type]
+    );
+
+    const [newVendor] = await db.query('SELECT * FROM diesel_vendors WHERE id = ?', [result.insertId]);
+    res.status(201).json(newVendor[0]);
+  } catch (error) {
+    console.error('Error adding diesel vendor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update diesel vendor
+app.put('/api/diesel-vendors/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, address, contact_person, supply_type } = req.body;
+
+    await db.query(
+      'UPDATE diesel_vendors SET name = ?, address = ?, contact_person = ?, supply_type = ? WHERE id = ?',
+      [name, address, contact_person, supply_type, id]
+    );
+
+    const [updatedVendor] = await db.query('SELECT * FROM diesel_vendors WHERE id = ?', [id]);
+    res.json(updatedVendor[0]);
+  } catch (error) {
+    console.error('Error updating diesel vendor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete diesel vendor
+app.delete('/api/diesel-vendors/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM diesel_vendors WHERE id = ?', [id]);
+    res.json({ message: 'Diesel vendor deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting diesel vendor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update the GET packages endpoint
 app.get('/api/packages', async (req, res) => {
   try {
