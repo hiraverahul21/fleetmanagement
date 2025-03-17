@@ -4,6 +4,23 @@ import './AddDieselReceiptsModal.css';
 
 const EditDieselReceiptsModal = ({ show, onClose, onUpdate, receipt }) => {
   const [vendors, setVendors] = useState([]);
+  const [staff, setStaff] = useState([]);
+  
+  useEffect(() => {
+    if (show) {
+      fetchVendors();
+      fetchStaff();
+    }
+  }, [show]);
+
+  const fetchStaff = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/staff/supervisors');
+      setStaff(response.data);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    }
+  };
   const [receiptData, setReceiptData] = useState(null);
 
   useEffect(() => {
@@ -102,6 +119,19 @@ const EditDieselReceiptsModal = ({ show, onClose, onUpdate, receipt }) => {
               onChange={(e) => setReceiptData({...receiptData, issued_date: e.target.value})}
               required
             />
+          </div>
+          <div className="form-group">
+            <label>Issued To</label>
+            <select
+              value={receiptData.staff_id || ''}
+              onChange={(e) => setReceiptData({...receiptData, staff_id: e.target.value})}
+              required
+            >
+              <option value="">Select Staff</option>
+              {staff.map(person => (
+                <option key={person.id} value={person.id}>{person.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label>Receipt From</label>

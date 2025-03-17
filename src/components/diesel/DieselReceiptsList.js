@@ -42,7 +42,7 @@ const DieselReceiptsList = () => {
     <div className="diesel-receipts-list-container">
       <div className="receipts-header">
         <h2>Diesel Receipts Management</h2>
-        <button className="add-receipt-btn" onClick={() => setShowModal(true)}>
+        <button className="add-receipt-btn" onClick={() => setShowAddModal(true)}>
           <i className="fas fa-plus"></i> Add Receipt
         </button>
       </div>
@@ -53,6 +53,7 @@ const DieselReceiptsList = () => {
               <th>Vendor Name</th>
               <th>Receipt Book ID</th>
               <th>Issued Date</th>
+              <th>Issued To</th>
               <th>Receipt From</th>
               <th>Receipt To</th>
               <th>Receipts Count</th>
@@ -67,6 +68,7 @@ const DieselReceiptsList = () => {
                 <td>{receipt.vendor_name}</td>
                 <td>{receipt.receipt_book_id}</td>
                 <td>{new Date(receipt.issued_date).toLocaleDateString()}</td>
+                <td>{receipt.staff_name}</td>
                 <td>{receipt.receipt_from}</td>
                 <td>{receipt.receipt_to}</td>
                 <td>{receipt.receipts_count}</td>

@@ -986,9 +986,11 @@ app.get('/api/diesel-receipts', async (req, res) => {
       SELECT 
         dr.*,
         DATE_FORMAT(dr.issued_date, '%Y-%m-%d') as issued_date,
-        dv.name as vendor_name 
+        dv.name as vendor_name,
+        s.name as staff_name
       FROM diesel_receipts dr
       LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      LEFT JOIN staff s ON dr.staff_id = s.id
       ORDER BY dr.id DESC
     `);
     res.json(rows);
@@ -1039,25 +1041,40 @@ app.post('/api/diesel-receipts', async (req, res) => {
 app.put('/api/diesel-receipts/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    // Remove vendor_name from the update data
-    const { vendor_name, ...updateData } = req.body;
+    // Remove vendor_name and staff_name from the update data
+    const { vendor_name, staff_name, ...updateData } = req.body;
     
     await db.query(
       'UPDATE diesel_receipts SET ? WHERE id = ?',
       [updateData, id]
     );
 
-    // Fetch the updated receipt with vendor name
+    // Fetch the updated receipt with vendor name and staff name
     const [updatedReceipt] = await db.query(`
-      SELECT dr.*, dv.name as vendor_name 
+      SELECT dr.*, dv.name as vendor_name, s.name as staff_name
       FROM diesel_receipts dr
       LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
+      LEFT JOIN staff s ON dr.staff_id = s.id
       WHERE dr.id = ?
     `, [id]);
 
     res.json(updatedReceipt[0]);
   } catch (error) {
     console.error('Error updating diesel receipt:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// Add this endpoint for staff names
+app.get('/api/staff/supervisors', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT id, name FROM staff 
+      WHERE role = 'supervisor' AND status = 'active'
+      ORDER BY name
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching staff:', error);
     res.status(500).json({ error: error.message });
   }
 });
