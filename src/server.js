@@ -983,7 +983,10 @@ app.post('/api/packages/recalculate', async (req, res) => {
 app.get('/api/diesel-receipts', async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT dr.*, dv.name as vendor_name 
+      SELECT 
+        dr.*,
+        DATE_FORMAT(dr.issued_date, '%Y-%m-%d') as issued_date,
+        dv.name as vendor_name 
       FROM diesel_receipts dr
       LEFT JOIN diesel_vendors dv ON dr.vendor_id = dv.id
       ORDER BY dr.id DESC

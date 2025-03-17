@@ -9,7 +9,12 @@ const EditDieselReceiptsModal = ({ show, onClose, onUpdate, receipt }) => {
   useEffect(() => {
     if (show && receipt) {
       fetchVendors();
-      setReceiptData(receipt);
+      // Format the date without timezone adjustment
+      const formattedReceipt = {
+        ...receipt,
+        issued_date: receipt.issued_date.substring(0, 10)
+      };
+      setReceiptData(formattedReceipt);
     }
   }, [show, receipt]);
 
