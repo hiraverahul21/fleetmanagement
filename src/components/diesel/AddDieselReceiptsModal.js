@@ -4,20 +4,25 @@ import './AddDieselReceiptsModal.css';
 
 const AddDieselReceiptsModal = ({ show, onClose, onAdd }) => {
   const [vendors, setVendors] = useState([]);
-  const [receiptData, setReceiptData] = useState({
+  const initialFormState = {
     vendor_id: '',
     receipt_book_id: '',
-    issued_date: '',
+    issued_date: new Date().toISOString().split('T')[0], // Set current date
     receipt_from: '',
     receipt_to: '',
-    receipts_count: '',
-    receipts_balance: '',
+    receipts_count: '0',
+    receipts_balance: '0',
     status: 'active'
-  });
+  };
+  
+  const [receiptData, setReceiptData] = useState(initialFormState);
 
   useEffect(() => {
-    fetchVendors();
-  }, []);
+    if (show) {
+      fetchVendors();
+      setReceiptData(initialFormState); // Reset form when modal opens
+    }
+  }, [show]);
 
   const fetchVendors = async () => {
     try {
