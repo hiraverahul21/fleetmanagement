@@ -6,6 +6,7 @@ import AddDieselVendorModal from './AddDieselVendorModal';
 const DieselVendorList = () => {
   const [vendors, setVendors] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingVendor, setEditingVendor] = useState(null);
 
   useEffect(() => {
     fetchVendors();
@@ -24,11 +25,25 @@ const DieselVendorList = () => {
     setVendors([...vendors, newVendor]);
   };
 
+  const handleEdit = (vendor) => {
+    setEditingVendor(vendor);
+    setShowModal(true);
+  };
+
+  const handleVendorUpdated = (updatedVendor) => {
+    setVendors(vendors.map(vendor => 
+      vendor.id === updatedVendor.id ? updatedVendor : vendor
+    ));
+  };
+
   return (
     <div className="diesel-vendor-list-container">
       <div className="vendor-header">
         <h2>Diesel Vendor Management</h2>
-        <button className="add-vendor-btn" onClick={() => setShowModal(true)}>
+        <button className="add-vendor-btn" onClick={() => {
+          setEditingVendor(null);
+          setShowModal(true);
+        }}>
           <i className="fas fa-plus"></i> Add Vendor
         </button>
       </div>
@@ -53,7 +68,10 @@ const DieselVendorList = () => {
                 <td>{vendor.contact_person}</td>
                 <td>{vendor.supply_type}</td>
                 <td>
-                  <button className="action-btn edit">
+                  <button 
+                    className="action-btn edit"
+                    onClick={() => handleEdit(vendor)}
+                  >
                     <i className="fas fa-edit"></i>
                   </button>
                   <button className="action-btn delete">
@@ -67,8 +85,13 @@ const DieselVendorList = () => {
       </div>
       <AddDieselVendorModal 
         show={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setEditingVendor(null);
+        }}
         onAdd={handleVendorAdded}
+        onUpdate={handleVendorUpdated}
+        vendor={editingVendor}
       />
     </div>
   );

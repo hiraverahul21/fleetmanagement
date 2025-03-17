@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AddDieselVendorModal.css';
 
-const AddDieselVendorModal = ({ show, onClose, onAdd }) => {
+const AddDieselVendorModal = ({ show, onClose, onAdd, onUpdate, vendor }) => {
   const [vendorData, setVendorData] = useState({
     name: '',
     address: '',
@@ -10,14 +10,34 @@ const AddDieselVendorModal = ({ show, onClose, onAdd }) => {
     supply_type: ''
   });
 
+  useEffect(() => {
+    if (vendor) {
+      setVendorData(vendor);
+    } else {
+      setVendorData({
+        name: '',
+        address: '',
+        contact_person: '',
+        supply_type: ''
+      });
+    }
+  }, [vendor]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/diesel-vendors', vendorData);
-      onAdd(response.data);
+      if (vendor) {
+        // Update existing vendor
+        const response = await axios.put(`http://localhost:5000/api/diesel-vendors/${vendor.id}`, vendorData);
+        onUpdate(response.data);
+      } else {
+        // Add new vendor
+        const response = await axios.post('http://localhost:5000/api/diesel-vendors', vendorData);
+        onAdd(response.data);
+      }
       onClose();
     } catch (error) {
-      console.error('Error adding diesel vendor:', error);
+      console.error('Error saving diesel vendor:', error);
     }
   };
 
@@ -27,7 +47,7 @@ const AddDieselVendorModal = ({ show, onClose, onAdd }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Add New Diesel Vendor</h2>
+          <h2>{vendor ? 'Edit Diesel Vendor' : 'Add New Diesel Vendor'}</h2>
           <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
         <form onSubmit={handleSubmit}>
@@ -72,7 +92,9 @@ const AddDieselVendorModal = ({ show, onClose, onAdd }) => {
           </div>
           <div className="modal-footer">
             <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="submit-btn">Add Vendor</button>
+            <button type="submit" className="submit-btn">
+              {vendor ? 'Update Vendor' : 'Add Vendor'}
+            </button>
           </div>
         </form>
       </div>
