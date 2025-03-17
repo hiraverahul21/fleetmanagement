@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DieselVendorList.css';
+import AddDieselVendorModal from './AddDieselVendorModal';
 
 const DieselVendorList = () => {
   const [vendors, setVendors] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchVendors();
@@ -18,11 +20,15 @@ const DieselVendorList = () => {
     }
   };
 
+  const handleVendorAdded = (newVendor) => {
+    setVendors([...vendors, newVendor]);
+  };
+
   return (
     <div className="diesel-vendor-list-container">
       <div className="vendor-header">
         <h2>Diesel Vendor Management</h2>
-        <button className="add-vendor-btn">
+        <button className="add-vendor-btn" onClick={() => setShowModal(true)}>
           <i className="fas fa-plus"></i> Add Vendor
         </button>
       </div>
@@ -59,6 +65,11 @@ const DieselVendorList = () => {
           </tbody>
         </table>
       </div>
+      <AddDieselVendorModal 
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onAdd={handleVendorAdded}
+      />
     </div>
   );
 };
