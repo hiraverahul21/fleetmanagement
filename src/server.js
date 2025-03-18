@@ -145,9 +145,17 @@ app.get('/api/vehicles', async (req, res) => {
         v.chassisNumber,
         v.status,
         v.partner_id,
-        COALESCE(p.name, 'Not Assigned') as partner_name
+        v.petrol_pump_id,
+        v.vehicle_capacity_id,
+        v.vehicle_average,
+        COALESCE(p.name, 'Not Assigned') as partner_name,
+        dv.name as petrol_pump_name,
+        vc.capacity as vehicle_capacity,
+        vc.average as default_average
       FROM vehicles v
       LEFT JOIN partners p ON v.partner_id = p.id
+      LEFT JOIN diesel_vendors dv ON v.petrol_pump_id = dv.id
+      LEFT JOIN vehicle_capacity vc ON v.vehicle_capacity_id = vc.id
       ORDER BY v.licensePlate
     `);
     console.log('Database response:', rows); // Debug log
