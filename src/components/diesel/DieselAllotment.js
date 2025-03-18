@@ -4,9 +4,26 @@ import './DieselAllotment.css';
 
 const DieselAllotment = () => {
   const [allotments, setAllotments] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [daysInMonth, setDaysInMonth] = useState(31);
+
+  const getMonthsForYear = (year) => {
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(year, i);
+      months.push({
+        value: i,
+        label: date.toLocaleString('default', { month: 'short' }) + '-' + year
+      });
+    }
+    return months;
+  };
 
   useEffect(() => {
     fetchAllotments();
+    const days = new Date(selectedYear, parseInt(selectedMonth) + 1, 0).getDate();
+    setDaysInMonth(days);
   }, []);
 
   const fetchAllotments = async () => {
@@ -18,10 +35,56 @@ const DieselAllotment = () => {
     }
   };
 
+  const getDaysInMonth = (year, month) => {
+    return new Date(year, parseInt(month) + 1, 0).getDate();
+  };
+
+  useEffect(() => {
+    const days = new Date(selectedYear, parseInt(selectedMonth) + 1, 0).getDate();
+    setDaysInMonth(days);
+  }, [selectedYear, selectedMonth]);
+
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
-        <h2>Diesel Allotment Management</h2>
+        <div>
+          <h2>Diesel Allotment Management</h2>
+          <div className="year-selector">
+            <label htmlFor="yearSelect">Select Year:</label>
+            <select 
+              id="yearSelect"
+              value={selectedYear} 
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="year-dropdown"
+            >
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+              <option value="2028">2028</option>
+            </select>
+            <label htmlFor="monthSelect">Select Month:</label>
+            <select
+              id="monthSelect"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              className="month-dropdown"
+            >
+              {getMonthsForYear(selectedYear).map((month) => (
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+            <label htmlFor="daysInMonth">Days in Month:</label>
+            <input
+              id="daysInMonth"
+              type="text"
+              value={daysInMonth}
+              readOnly
+              className="days-input"
+            />
+          </div>
+        </div>
         <button className="add-allotment-btn">
           <i className="fas fa-plus"></i> Add Allotment
         </button>
