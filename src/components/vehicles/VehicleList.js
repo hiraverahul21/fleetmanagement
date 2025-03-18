@@ -80,9 +80,21 @@ const VehicleList = () => {
     },
     { title: 'Status', dataIndex: 'status', key: 'status' },
     {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record) => (
+      title: 'Vehicle Capacity',
+      dataIndex: 'vehicle_capacity',
+      key: 'vehicle_capacity',
+    },
+    {
+      title: 'Vehicle Average',
+      dataIndex: 'vehicle_average',
+      key: 'vehicle_average',
+    },
+    {
+      title: 'Petrol Pump',
+      dataIndex: 'petrol_pump_name',
+      key: 'petrol_pump_name',
+    },
+    { title: 'Actions', key: 'actions', render: (_, record) => (
         <Space>
           <Button 
             type="primary" 

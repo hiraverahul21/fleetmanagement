@@ -133,32 +133,17 @@ app.get('/api/vehicles', async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
-        v.id,
-        v.licensePlate,
-        v.make,
-        v.model,
-        v.year,
-        v.color,
-        v.vehicleType,
-        v.fuelType,
-        v.engineNumber,
-        v.chassisNumber,
-        v.status,
-        v.partner_id,
-        v.petrol_pump_id,
-        v.vehicle_capacity_id,
-        v.vehicle_average,
+        v.*,
         COALESCE(p.name, 'Not Assigned') as partner_name,
-        dv.name as petrol_pump_name,
-        vc.capacity as vehicle_capacity,
-        vc.average as default_average
+        COALESCE(dv.name, 'Not Assigned') as petrol_pump_name,
+        COALESCE(vc.capacity, 'Not Set') as vehicle_capacity,
+        COALESCE(v.vehicle_average, COALESCE(vc.average, 'Not Set')) as vehicle_average
       FROM vehicles v
       LEFT JOIN partners p ON v.partner_id = p.id
       LEFT JOIN diesel_vendors dv ON v.petrol_pump_id = dv.id
       LEFT JOIN vehicle_capacity vc ON v.vehicle_capacity_id = vc.id
       ORDER BY v.licensePlate
     `);
-    console.log('Database response:', rows); // Debug log
     res.json(rows);
   } catch (error) {
     console.error('Database error:', error);
