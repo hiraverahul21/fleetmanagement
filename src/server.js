@@ -431,17 +431,34 @@ app.post('/api/login', async (req, res) => {
 
 // Add these diesel vendor endpoints before app.listen()
 
-// Get all diesel vendors
+// // Get all diesel vendors
+// app.get('/api/diesel-vendors', async (req, res) => {
+//   try {
+//     const [rows] = await db.query('SELECT * FROM diesel_vendors ORDER BY id DESC');
+//     res.json(rows);
+//   } catch (error) {
+//     console.error('Error fetching diesel vendors:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+// Get all diesel vendors (petrol pumps)
 app.get('/api/diesel-vendors', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM diesel_vendors ORDER BY id DESC');
+    const [rows] = await db.query(`
+      SELECT 
+        id,
+        name,
+        address,
+        contact_person,
+        supply_type 
+      FROM diesel_vendors       
+      ORDER BY name`);
     res.json(rows);
   } catch (error) {
     console.error('Error fetching diesel vendors:', error);
     res.status(500).json({ error: error.message });
   }
 });
-
 // Add new diesel vendor
 app.post('/api/diesel-vendors', async (req, res) => {
   try {
@@ -1077,6 +1094,16 @@ app.get('/api/staff/supervisors', async (req, res) => {
     res.json(rows);
   } catch (error) {
     console.error('Error fetching staff:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// Get all vehicle capacities
+app.get('/api/vehicle-capacities', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, capacity, average FROM vehicle_capacity WHERE status = "active"');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching vehicle capacities:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -5,7 +5,35 @@ import { message } from 'antd';
 
 const AddVehicle = ({ onSuccess, initialValues }) => {
   const [form] = Form.useForm();
-  const [partners, setPartners] = useState([]); // Add partners state
+  const [partners, setPartners] = useState([]);
+  const [petrolPumps, setPetrolPumps] = useState([]);
+  const [vehicleCapacities, setVehicleCapacities] = useState([]);
+
+  // Add fetchPetrolPumps function
+  const fetchPetrolPumps = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/diesel-vendors');
+      const data = await response.json();
+      // Ensure we're setting an array
+      setPetrolPumps(Array.isArray(data) ? data : []);
+    } catch (error) {
+      message.error('Failed to fetch petrol pumps');
+      console.error('Error:', error);
+      setPetrolPumps([]); // Set empty array on error
+    }
+  };
+
+  // Add fetchVehicleCapacities function
+  const fetchVehicleCapacities = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/vehicle-capacities');
+      const data = await response.json();
+      setVehicleCapacities(data);
+    } catch (error) {
+      message.error('Failed to fetch vehicle capacities');
+      console.error('Error:', error);
+    }
+  };
 
   // Add fetchPartners function
   const fetchPartners = async () => {
@@ -20,22 +48,28 @@ const AddVehicle = ({ onSuccess, initialValues }) => {
   };
 
   useEffect(() => {
-    fetchPartners(); // Fetch partners when component mounts
+    fetchPartners();
+    fetchPetrolPumps();
+    fetchVehicleCapacities();
     if (initialValues) {
       form.setFieldsValue(initialValues);
     }
   }, [initialValues, form]);
 
+  // Define these constants only once
   const vehicleTypes = ['Sedan', 'SUV', 'Van', 'Truck', 'Bus'];
   const fuelTypes = ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'CNG'];
   const statusOptions = ['Active', 'Maintenance', 'Out of Service'];
 
-  useEffect(() => {
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
+  // Add handler for capacity change
+  const handleCapacityChange = (value) => {
+    const selectedCapacity = vehicleCapacities.find(cap => cap.id === value);
+    if (selectedCapacity) {
+      form.setFieldsValue({ vehicle_average: selectedCapacity.average });
     }
-  }, [initialValues, form]);
+  };
 
+  // Remove duplicate declarations and useEffect
   const onFinish = async (values) => {
     try {
       const url = initialValues 
@@ -180,6 +214,54 @@ const AddVehicle = ({ onSuccess, initialValues }) => {
                   <Select.Option key={type} value={type}>{type}</Select.Option>
                 ))}
               </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="petrol_pump_id"
+              label="Petrol Pump"
+              rules={[{ required: true, message: 'Please select a petrol pump' }]}
+            >
+              <Select placeholder="Select petrol pump">
+                {Array.isArray(petrolPumps) && petrolPumps.map(pump => (
+                  <Select.Option key={pump.id} value={pump.id}>
+                    {pump.name} {pump.address ? `- ${pump.address}` : ''}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="vehicle_capacity_id"
+              label="Vehicle Capacity"
+              rules={[{ required: true, message: 'Please select vehicle capacity' }]}
+            >
+              <Select 
+                placeholder="Select capacity"
+                onChange={handleCapacityChange}
+              >
+                {vehicleCapacities.map(capacity => (
+                  <Select.Option key={capacity.id} value={capacity.id}>
+                    {capacity.capacity}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} sm={12} lg={8}>
+            <Form.Item
+              name="vehicle_average"
+              label="Vehicle Average"
+            >
+              <Input 
+                placeholder="Vehicle average" 
+                readOnly 
+                disabled
+              />
             </Form.Item>
           </Col>
 
