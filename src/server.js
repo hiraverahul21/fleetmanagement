@@ -703,11 +703,6 @@ app.get('/api/drivers', async (req, res) => {
   }
 });
 
-// Move app.listen() to the end
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-
 // Add this with your other API endpoints
 app.get('/api/main-routes/company', async (req, res) => {
   try {
@@ -1099,4 +1094,46 @@ app.get('/api/vehicle-capacities', async (req, res) => {
     console.error('Error fetching vehicle capacities:', error);
     res.status(500).json({ error: error.message });
   }
+});
+// Add this before app.listen()
+app.get('/api/diesel-allotments', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        p.id,
+        p.vehicle_no,
+        p.route_id,
+        mr.company_route_id,
+        mr.route_name,
+        p.route_total_kms,
+        p.trips_per_day,
+        p.no_of_days,
+        p.monthly_kms,
+        p.actual_kms,
+        p.shift,
+        p.diesel_status,
+        p.status,
+        s.name as supervisor_name,
+        d.name as driver_name,
+        c.name as company_name,
+        pt.name as partner_name
+      FROM packages p
+      LEFT JOIN main_route mr ON p.route_id = mr.route_id
+      LEFT JOIN staff s ON p.supervisor_id = s.id
+      LEFT JOIN drivers d ON p.driver_id = d.id
+      LEFT JOIN companies c ON p.company_id = c.id
+      LEFT JOIN partners pt ON p.partner_id = pt.id
+      WHERE p.status = 'active'      
+      ORDER BY p.id DESC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching diesel allotments:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Move app.listen() to the end
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

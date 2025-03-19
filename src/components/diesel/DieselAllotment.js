@@ -94,11 +94,11 @@ const DieselAllotment = () => {
           <thead>
             <tr>
               <th>Vehicle No</th>
-              <th>Driver Name</th>
-              <th>Allotment Date</th>
-              <th>Quantity (Liters)</th>
-              <th>Vendor Name</th>
-              <th>Status</th>
+              <th>Company Route ID</th>
+              <th>Route Name</th>
+              <th>Monthly Kms</th>
+              <th>Actual Kms</th>
+              <th>Supervisor Name</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -106,11 +106,11 @@ const DieselAllotment = () => {
             {allotments.map((allotment) => (
               <tr key={allotment.id}>
                 <td>{allotment.vehicle_no}</td>
-                <td>{allotment.driver_name}</td>
-                <td>{allotment.allotment_date}</td>
-                <td>{allotment.quantity}</td>
-                <td>{allotment.vendor_name}</td>
-                <td>{allotment.status}</td>
+                <td>{allotment.company_route_id}</td>
+                <td>{allotment.route_name}</td>
+                <td>{allotment.monthly_kms}</td>
+                <td>{allotment.actual_kms}</td>
+                <td>{allotment.supervisor_name || 'Not Assigned'}</td>
                 <td>
                   <button className="action-btn edit">
                     <i className="fas fa-edit"></i>
