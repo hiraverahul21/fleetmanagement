@@ -158,6 +158,36 @@ const DieselAllotment = () => {
     }
   };
 
+  // Add with other state declarations at the top
+  const [selectedReceiptNumbers, setSelectedReceiptNumbers] = useState({});
+  
+  // Add this function with your other handlers before the return statement
+  const handleReceiptNumberChange = (receiptNumber, allotmentId, index) => {
+    // Check if this receipt number is already selected in another row
+    const isAlreadySelected = Object.entries(selectedReceiptNumbers).some(
+      ([key, value]) => {
+        const [currentAllotmentId, currentIndex] = key.split('_');
+        return value === receiptNumber && 
+               (currentAllotmentId !== allotmentId.toString() || currentIndex !== index.toString());
+      }
+    );
+  
+    if (isAlreadySelected) {
+      alert('This receipt number is already selected. Please choose a different one.');
+      return;
+    }
+  
+    setSelectedReceiptNumbers(prev => ({
+      ...prev,
+      [`${allotmentId}_${index}`]: receiptNumber
+    }));
+  
+    setReceiptNumbers(prev => ({
+      ...prev,
+      [`${allotmentId}_${index}`]: receiptNumber
+    }));
+  };
+
   // Keep only the expanded row section inside the return statement's allotments.map
   return (
     <div className="diesel-allotment-container">
@@ -320,11 +350,20 @@ const DieselAllotment = () => {
                                     </select>
                                   </td>
                                   <td>
-                                    <select className="receipt-no-dropdown">
+                                    <select 
+                                      className="receipt-no-dropdown"
+                                      disabled={!selectedReceiptBooks[allotment.id]}
+                                      value={receiptNumbers[`${allotment.id}_${index}`] || ''}
+                                      onChange={(e) => handleReceiptNumberChange(e.target.value, allotment.id, index)}
+                                    >
                                       <option value="">Select Receipt No</option>
                                       {receiptNumbers[allotment.id]?.map(number => (
-                                        <option key={number.value} value={number.value}>
-                                          {number.label}
+                                        <option 
+                                          key={number.value} 
+                                          value={number.value}
+                                          disabled={number.isUsed}
+                                        >
+                                          {number.label} {number.isUsed ? '(Used)' : ''}
                                         </option>
                                       ))}
                                     </select>
