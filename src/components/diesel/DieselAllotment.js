@@ -104,6 +104,7 @@ const DieselAllotment = () => {
               <th>Actual Kms</th>
               <th>Vehicle Average</th>
               <th>Vehicle Capacity</th>
+              <th>Diesel Require</th>
               <th>Supervisor Name</th>
               <th>Actions</th>
             </tr>
@@ -121,6 +122,12 @@ const DieselAllotment = () => {
                 <td>{allotment.actual_kms}</td>
                 <td>{allotment.vehicle_average || 'N/A'}</td>
                 <td>{allotment.vehicle_capacity || 'N/A'}</td>
+                <td>
+                  {allotment.monthly_kms && allotment.vehicle_average 
+                    ? Math.round(allotment.monthly_kms / allotment.vehicle_average)
+                    : 'N/A'
+                  }
+                </td>
                 <td>{allotment.supervisor_name || 'Not Assigned'}</td>
                 <td>
                   <button className="action-btn edit">
