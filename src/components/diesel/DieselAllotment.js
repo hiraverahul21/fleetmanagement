@@ -72,7 +72,13 @@ const DieselAllotment = () => {
     }
     setExpandedRows(newExpandedRows);
   };
-  
+
+  // Add the calculateDieselPerReceipt function here with other helper functions
+  const calculateDieselPerReceipt = (totalDiesel, numberOfReceipts) => {
+    if (!totalDiesel || numberOfReceipts === 0) return 0;
+    return Math.round(totalDiesel / numberOfReceipts);
+  };
+
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
@@ -193,17 +199,25 @@ const DieselAllotment = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {getWeeklyDates(selectedYear, selectedMonth).map((date, index) => (
-                              <tr key={index}>
-                                <td>Sample Pump</td>
-                                <td>{`RB00${index + 1}`}</td>
-                                <td>{`12345${index + 1}`}</td>
-                                <td>{date.toLocaleDateString()}</td>
-                                <td>100</td>
-                                <td>Auto</td>
-                                <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>
-                              </tr>
-                            ))}
+                            {(() => {
+                              const weeklyDates = getWeeklyDates(selectedYear, selectedMonth);
+                              const totalDiesel = allotment.monthly_kms && allotment.vehicle_average 
+                                ? Math.round(allotment.monthly_kms / allotment.vehicle_average)
+                                : 0;
+                              const dieselPerReceipt = calculateDieselPerReceipt(totalDiesel, weeklyDates.length);
+                              
+                              return weeklyDates.map((date, index) => (
+                                <tr key={index}>
+                                  <td>Sample Pump</td>
+                                  <td>{`RB00${index + 1}`}</td>
+                                  <td>{`12345${index + 1}`}</td>
+                                  <td>{date.toLocaleDateString()}</td>
+                                  <td>{dieselPerReceipt}</td>
+                                  <td>Auto</td>
+                                  <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>
+                                </tr>
+                              ));
+                            })()}
                           </tbody>
                         </table>
                       </div>
