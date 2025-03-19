@@ -1181,6 +1181,33 @@ app.get('/api/diesel-receipts/:vendorId', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Add this endpoint before app.listen()
+app.get('/api/diesel-receipts/:receiptBookId/numbers', async (req, res) => {
+  try {
+    const { receiptBookId } = req.params;
+    const [receipt] = await db.query(`
+      SELECT receipt_from, receipt_to 
+      FROM diesel_receipts 
+      WHERE receipt_book_id = ? AND status = 'active'
+    `, [receiptBookId]);
+
+    if (!receipt.length) {
+      return res.json([]);
+    }
+
+    const { receipt_from, receipt_to } = receipt[0];
+    const receiptNumbers = [];
+    
+    for (let i = receipt_from; i <= receipt_to; i++) {
+      receiptNumbers.push({ value: i, label: i.toString() });
+    }
+    
+    res.json(receiptNumbers);
+  } catch (error) {
+    console.error('Error fetching receipt numbers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

@@ -44,8 +44,33 @@ const DieselAllotment = () => {
   // Add these state declarations at the top with other states
   const [selectedVendors, setSelectedVendors] = useState({});
   const [vendorReceiptBooks, setVendorReceiptBooks] = useState({});
+  const [receiptNumbers, setReceiptNumbers] = useState({});
+  const [selectedReceiptBooks, setSelectedReceiptBooks] = useState({});
   
-  // Update the fetchVendors function
+  // Add these functions before the return statement
+  const fetchReceiptNumbers = async (receiptBookId, allotmentId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
+      setReceiptNumbers(prev => ({
+        ...prev,
+        [allotmentId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching receipt numbers:', error);
+    }
+  };
+  
+  const handleReceiptBookChange = async (receiptBookId, allotmentId) => {
+    setSelectedReceiptBooks(prev => ({
+      ...prev,
+      [allotmentId]: receiptBookId
+    }));
+    if (receiptBookId) {
+      await fetchReceiptNumbers(receiptBookId, allotmentId);
+    }
+  };
+
+  // Add the fetchVendors function
   const fetchVendors = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/diesel-vendors/active-receipts');
@@ -278,10 +303,13 @@ const DieselAllotment = () => {
                                       ))}
                                     </select>
                                   </td>
+                                  
                                   <td>
                                     <select 
                                       className="receipt-book-dropdown"
                                       disabled={!selectedVendors[allotment.id]}
+                                      value={selectedReceiptBooks[allotment.id] || ''}
+                                      onChange={(e) => handleReceiptBookChange(e.target.value, allotment.id)}
                                     >
                                       <option value="">Select Receipt Book</option>
                                       {vendorReceiptBooks[allotment.id]?.map(book => (
@@ -294,9 +322,9 @@ const DieselAllotment = () => {
                                   <td>
                                     <select className="receipt-no-dropdown">
                                       <option value="">Select Receipt No</option>
-                                      {[...Array(5)].map((_, i) => (
-                                        <option key={i} value={`12345${i + 1}`}>
-                                          {`12345${i + 1}`}
+                                      {receiptNumbers[allotment.id]?.map(number => (
+                                        <option key={number.value} value={number.value}>
+                                          {number.label}
                                         </option>
                                       ))}
                                     </select>
