@@ -48,25 +48,42 @@ const DieselAllotment = () => {
   const [selectedReceiptBooks, setSelectedReceiptBooks] = useState({});
   
   // Add these functions before the return statement
-  const fetchReceiptNumbers = async (receiptBookId, allotmentId) => {
+  // Modify the fetchReceiptNumbers function
+  const fetchReceiptNumbers = async (receiptBookId, allotmentId, index) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
+      // Ensure response.data is an array before setting it in state
+      const numbers = Array.isArray(response.data) ? response.data : [];
       setReceiptNumbers(prev => ({
         ...prev,
-        [allotmentId]: response.data
+        [`${allotmentId}_${index}`]: numbers
       }));
     } catch (error) {
       console.error('Error fetching receipt numbers:', error);
+      setReceiptNumbers(prev => ({
+        ...prev,
+        [`${allotmentId}_${index}`]: []
+      }));
     }
   };
   
-  const handleReceiptBookChange = async (receiptBookId, allotmentId) => {
+  // Update the handleReceiptBookChange function
+  // Move these function definitions outside of JSX, place them with other functions before the return statement
+  const handleReceiptBookChange = async (receiptBookId, allotmentId, index) => {
+    // Clear receipt numbers when receipt book changes
+    setReceiptNumbers(prev => ({
+      ...prev,
+      [`${allotmentId}_${index}`]: []
+    }));
+    
+    // Update selected receipt book
     setSelectedReceiptBooks(prev => ({
       ...prev,
-      [allotmentId]: receiptBookId
+      [`${allotmentId}_${index}`]: receiptBookId
     }));
+  
     if (receiptBookId) {
-      await fetchReceiptNumbers(receiptBookId, allotmentId);
+      await fetchReceiptNumbers(receiptBookId, allotmentId, index);
     }
   };
 
@@ -162,6 +179,7 @@ const DieselAllotment = () => {
   const [selectedReceiptNumbers, setSelectedReceiptNumbers] = useState({});
   
   // Add this function with your other handlers before the return statement
+  // Update the handleReceiptNumberChange function
   const handleReceiptNumberChange = (receiptNumber, allotmentId, index) => {
     // Check if this receipt number is already selected in another row
     const isAlreadySelected = Object.entries(selectedReceiptNumbers).some(
@@ -178,11 +196,6 @@ const DieselAllotment = () => {
     }
   
     setSelectedReceiptNumbers(prev => ({
-      ...prev,
-      [`${allotmentId}_${index}`]: receiptNumber
-    }));
-  
-    setReceiptNumbers(prev => ({
       ...prev,
       [`${allotmentId}_${index}`]: receiptNumber
     }));
@@ -318,7 +331,6 @@ const DieselAllotment = () => {
                               
                               return weeklyDates.map((date, index) => (
                                 <tr key={index}>
-                                 
                                   <td>
                                     <select 
                                       className="pump-dropdown"
@@ -333,13 +345,12 @@ const DieselAllotment = () => {
                                       ))}
                                     </select>
                                   </td>
-                                  
                                   <td>
                                     <select 
                                       className="receipt-book-dropdown"
                                       disabled={!selectedVendors[allotment.id]}
-                                      value={selectedReceiptBooks[allotment.id] || ''}
-                                      onChange={(e) => handleReceiptBookChange(e.target.value, allotment.id)}
+                                      value={selectedReceiptBooks[`${allotment.id}_${index}`] || ''}
+                                      onChange={(e) => handleReceiptBookChange(e.target.value, allotment.id, index)}
                                     >
                                       <option value="">Select Receipt Book</option>
                                       {vendorReceiptBooks[allotment.id]?.map(book => (
@@ -352,12 +363,12 @@ const DieselAllotment = () => {
                                   <td>
                                     <select 
                                       className="receipt-no-dropdown"
-                                      disabled={!selectedReceiptBooks[allotment.id]}
-                                      value={receiptNumbers[`${allotment.id}_${index}`] || ''}
+                                      disabled={!selectedReceiptBooks[`${allotment.id}_${index}`]}
+                                      value={selectedReceiptNumbers[`${allotment.id}_${index}`] || ''}
                                       onChange={(e) => handleReceiptNumberChange(e.target.value, allotment.id, index)}
                                     >
                                       <option value="">Select Receipt No</option>
-                                      {receiptNumbers[allotment.id]?.map(number => (
+                                      {receiptNumbers[`${allotment.id}_${index}`]?.map(number => (
                                         <option 
                                           key={number.value} 
                                           value={number.value}
