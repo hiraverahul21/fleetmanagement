@@ -103,6 +103,7 @@ const DieselAllotment = () => {
               <th>Monthly Kms</th>
               <th>Actual Kms</th>
               <th>Vehicle Average</th>
+              <th>Vehicle Capacity</th>
               <th>Supervisor Name</th>
               <th>Actions</th>
             </tr>
@@ -119,6 +120,7 @@ const DieselAllotment = () => {
                 <td>{allotment.monthly_kms}</td>
                 <td>{allotment.actual_kms}</td>
                 <td>{allotment.vehicle_average || 'N/A'}</td>
+                <td>{allotment.vehicle_capacity || 'N/A'}</td>
                 <td>{allotment.supervisor_name || 'Not Assigned'}</td>
                 <td>
                   <button className="action-btn edit">
