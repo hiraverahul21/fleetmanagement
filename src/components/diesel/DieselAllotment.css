@@ -40,6 +40,15 @@
   font-weight: 600;
 }
 
+.allotment-content table tbody tr td {
+  font-weight: 600;  /* Makes the main row text bold */
+}
+
+/* Keep sub-table text normal weight */
+.sub-table tbody tr td {
+  font-weight: normal;
+}
+
 .action-btn {
   padding: 6px 12px;
   margin: 0 4px;
@@ -163,8 +172,14 @@
   text-align: left;
 }
 
-.sub-table thead tr {
-  background-color: #f1f3f5;
+/* Override the previous header background color */
+.allotment-content th {
+  background-color: #e6f3ff !important;  /* light blue color */
+}
+
+.diesel-allotment-container table thead tr th,
+.sub-table thead tr th {
+  background-color: #e6f3ff !important;  /* light blue color */
 }
 
 .sub-table tbody tr:hover {
