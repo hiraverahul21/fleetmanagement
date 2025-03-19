@@ -7,6 +7,25 @@ const DieselAllotment = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [daysInMonth, setDaysInMonth] = useState(31);
+  const [expandedRows, setExpandedRows] = useState(new Set());
+  const [pumpDetails, setPumpDetails] = useState({});
+
+  // Add the helper function here, before the other functions
+  const getWeeklyDates = (year, month) => {
+    const dates = [];
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Get first Sunday of the month
+    let currentDate = new Date(firstDay);
+    currentDate.setDate(currentDate.getDate() + (7 - currentDate.getDay()));
+  
+    while (currentDate <= lastDay) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+    return dates;
+  };
 
   const getMonthsForYear = (year) => {
     const months = [];
@@ -44,13 +63,6 @@ const DieselAllotment = () => {
     setDaysInMonth(days);
   }, [selectedYear, selectedMonth]);
 
-  // Modify the table header and body
-  // Add new state for expanded rows and pump details
-  // Add these new state variables at the top of your component
-  const [expandedRows, setExpandedRows] = useState(new Set());
-  const [pumpDetails, setPumpDetails] = useState({});
-  
-  // Add this function to handle row expansion
   const toggleRow = (id) => {
     const newExpandedRows = new Set(expandedRows);
     if (newExpandedRows.has(id)) {
@@ -61,7 +73,6 @@ const DieselAllotment = () => {
     setExpandedRows(newExpandedRows);
   };
   
-  // Update the table structure in your return statement
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
@@ -182,15 +193,17 @@ const DieselAllotment = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td>Sample Pump</td>
-                              <td>RB001</td>
-                              <td>12345</td>
-                              <td>2025-03-15</td>
-                              <td>100</td>
-                              <td>Auto</td>
-                              <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>
-                            </tr>
+                            {getWeeklyDates(selectedYear, selectedMonth).map((date, index) => (
+                              <tr key={index}>
+                                <td>Sample Pump</td>
+                                <td>{`RB00${index + 1}`}</td>
+                                <td>{`12345${index + 1}`}</td>
+                                <td>{date.toLocaleDateString()}</td>
+                                <td>100</td>
+                                <td>Auto</td>
+                                <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
