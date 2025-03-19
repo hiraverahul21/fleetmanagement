@@ -44,6 +44,7 @@ const DieselAllotment = () => {
     setDaysInMonth(days);
   }, [selectedYear, selectedMonth]);
 
+  // Modify the table header and body
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
@@ -94,6 +95,9 @@ const DieselAllotment = () => {
           <thead>
             <tr>
               <th>Vehicle No</th>
+              <th>Year</th>
+              <th>Allotment Month</th>
+              <th>No Of Days</th>
               <th>Company Route ID</th>
               <th>Route Name</th>
               <th>Monthly Kms</th>
@@ -106,6 +110,9 @@ const DieselAllotment = () => {
             {allotments.map((allotment) => (
               <tr key={allotment.id}>
                 <td>{allotment.vehicle_no}</td>
+                <td>{selectedYear}</td>
+                <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>
+                <td>{daysInMonth}</td>
                 <td>{allotment.company_route_id}</td>
                 <td>{allotment.route_name}</td>
                 <td>{allotment.monthly_kms}</td>
