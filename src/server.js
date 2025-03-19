@@ -1116,13 +1116,15 @@ app.get('/api/diesel-allotments', async (req, res) => {
         s.name as supervisor_name,
         d.name as driver_name,
         c.name as company_name,
-        pt.name as partner_name
+        pt.name as partner_name,
+        v.vehicle_average as vehicle_average
       FROM packages p
       LEFT JOIN main_route mr ON p.route_id = mr.route_id
       LEFT JOIN staff s ON p.supervisor_id = s.id
       LEFT JOIN drivers d ON p.driver_id = d.id
       LEFT JOIN companies c ON p.company_id = c.id
       LEFT JOIN partners pt ON p.partner_id = pt.id
+      LEFT JOIN vehicles v ON p.vehicle_no = v.licensePlate
       WHERE p.status = 'active'      
       ORDER BY p.id DESC
     `);
