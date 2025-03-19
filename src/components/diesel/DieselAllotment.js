@@ -42,16 +42,40 @@ const DieselAllotment = () => {
   };
 
   // Add these state declarations at the top with other states
-  // const [vendors, setVendors] = useState([]);
-  // const [receiptBooks, setReceiptBooks] = useState([]);
-
-  // Add these fetch functions after other functions
+  const [selectedVendors, setSelectedVendors] = useState({});
+  const [vendorReceiptBooks, setVendorReceiptBooks] = useState({});
+  
+  // Update the fetchVendors function
   const fetchVendors = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/diesel-vendors');
+      const response = await axios.get('http://localhost:5000/api/diesel-vendors/active-receipts');
       setVendors(response.data);
     } catch (error) {
       console.error('Error fetching vendors:', error);
+    }
+  };
+  
+  // Add new function to fetch receipt books for selected vendor
+  const fetchVendorReceiptBooks = async (vendorId, allotmentId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${vendorId}`);
+      setVendorReceiptBooks(prev => ({
+        ...prev,
+        [allotmentId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching vendor receipt books:', error);
+    }
+  };
+  
+  // Add vendor selection handler
+  const handleVendorChange = async (vendorId, allotmentId) => {
+    setSelectedVendors(prev => ({
+      ...prev,
+      [allotmentId]: vendorId
+    }));
+    if (vendorId) {
+      await fetchVendorReceiptBooks(vendorId, allotmentId);
     }
   };
 
@@ -239,8 +263,13 @@ const DieselAllotment = () => {
                               
                               return weeklyDates.map((date, index) => (
                                 <tr key={index}>
+                                 
                                   <td>
-                                    <select className="pump-dropdown">
+                                    <select 
+                                      className="pump-dropdown"
+                                      value={selectedVendors[allotment.id] || ''}
+                                      onChange={(e) => handleVendorChange(e.target.value, allotment.id)}
+                                    >
                                       <option value="">Select Pump</option>
                                       {vendors.map(vendor => (
                                         <option key={vendor.id} value={vendor.id}>
@@ -250,9 +279,12 @@ const DieselAllotment = () => {
                                     </select>
                                   </td>
                                   <td>
-                                    <select className="receipt-book-dropdown">
+                                    <select 
+                                      className="receipt-book-dropdown"
+                                      disabled={!selectedVendors[allotment.id]}
+                                    >
                                       <option value="">Select Receipt Book</option>
-                                      {receiptBooks.map(book => (
+                                      {vendorReceiptBooks[allotment.id]?.map(book => (
                                         <option key={book.id} value={book.receipt_book_id}>
                                           {book.receipt_book_id}
                                         </option>

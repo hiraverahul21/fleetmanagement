@@ -1136,7 +1136,51 @@ app.get('/api/diesel-allotments', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+// Add this new endpoint to get only vendors with receipts
+app.get('/api/diesel-vendors/active-receipts', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DISTINCT dv.* 
+      FROM diesel_vendors dv
+      INNER JOIN diesel_receipts dr ON dv.id = dr.vendor_id
+      WHERE dr.status = 'active'
+      ORDER BY dv.name
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching vendors with receipts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+// Add this endpoint to get diesel receipts for a specific vendor
+app.get('/api/diesel-receipts/:vendorId', async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const [rows] = await db.query(`
+      SELECT 
+        id,
+        receipt_book_id,
+        receipt_from,
+        receipt_to,
+        receipts_balance,
+        status
+      FROM diesel_receipts
+      WHERE vendor_id = ? 
+        AND status = 'active'
+        AND receipts_balance > 0
+      ORDER BY receipt_book_id
+    `, [vendorId]);
+    
+    if (rows.length === 0) {
+      return res.json([]); // Return empty array if no receipts found
+    }
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching vendor receipts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
