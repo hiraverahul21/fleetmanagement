@@ -181,3 +181,13 @@
   padding: 15px;
   border-top: 2px solid #dee2e6;
 }
+
+.pump-dropdown,
+.receipt-book-dropdown,
+.receipt-no-dropdown {
+  width: 100%;
+  padding: 4px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}

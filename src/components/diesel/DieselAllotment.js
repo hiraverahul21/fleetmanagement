@@ -9,6 +9,8 @@ const DieselAllotment = () => {
   const [daysInMonth, setDaysInMonth] = useState(31);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [pumpDetails, setPumpDetails] = useState({});
+  const [vendors, setVendors] = useState([]);
+  const [receiptBooks, setReceiptBooks] = useState([]);
 
   // Add the helper function here, before the other functions
   const getWeeklyDates = (year, month) => {
@@ -39,21 +41,39 @@ const DieselAllotment = () => {
     return months;
   };
 
-  useEffect(() => {
-    fetchAllotments();
-    const days = new Date(selectedYear, parseInt(selectedMonth) + 1, 0).getDate();
-    setDaysInMonth(days);
-  }, []);
+  // Add these state declarations at the top with other states
+  // const [vendors, setVendors] = useState([]);
+  // const [receiptBooks, setReceiptBooks] = useState([]);
 
-  const fetchAllotments = async () => {
+  // Add these fetch functions after other functions
+  const fetchVendors = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/diesel-allotments');
-      setAllotments(response.data);
+      const response = await axios.get('http://localhost:5000/api/diesel-vendors');
+      setVendors(response.data);
     } catch (error) {
-      console.error('Error fetching diesel allotments:', error);
+      console.error('Error fetching vendors:', error);
     }
   };
 
+  const fetchReceiptBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/diesel-receipts');
+      setReceiptBooks(response.data);
+    } catch (error) {
+      console.error('Error fetching receipt books:', error);
+    }
+  };
+
+  // Update the initial useEffect
+  useEffect(() => {
+    fetchAllotments();
+    fetchVendors();
+    fetchReceiptBooks();
+    const days = new Date(selectedYear, parseInt(selectedMonth) + 1, 0).getDate();
+    setDaysInMonth(days);
+  }, []);
+  
+  // Update the expanded row content
   const getDaysInMonth = (year, month) => {
     return new Date(year, parseInt(month) + 1, 0).getDate();
   };
@@ -79,6 +99,17 @@ const DieselAllotment = () => {
     return Math.round(totalDiesel / numberOfReceipts);
   };
 
+  // Add fetchAllotments function if it's missing
+  const fetchAllotments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/diesel-allotments');
+      setAllotments(response.data);
+    } catch (error) {
+      console.error('Error fetching allotments:', error);
+    }
+  };
+
+  // Keep only the expanded row section inside the return statement's allotments.map
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
@@ -208,9 +239,36 @@ const DieselAllotment = () => {
                               
                               return weeklyDates.map((date, index) => (
                                 <tr key={index}>
-                                  <td>Sample Pump</td>
-                                  <td>{`RB00${index + 1}`}</td>
-                                  <td>{`12345${index + 1}`}</td>
+                                  <td>
+                                    <select className="pump-dropdown">
+                                      <option value="">Select Pump</option>
+                                      {vendors.map(vendor => (
+                                        <option key={vendor.id} value={vendor.id}>
+                                          {vendor.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="receipt-book-dropdown">
+                                      <option value="">Select Receipt Book</option>
+                                      {receiptBooks.map(book => (
+                                        <option key={book.id} value={book.receipt_book_id}>
+                                          {book.receipt_book_id}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <select className="receipt-no-dropdown">
+                                      <option value="">Select Receipt No</option>
+                                      {[...Array(5)].map((_, i) => (
+                                        <option key={i} value={`12345${i + 1}`}>
+                                          {`12345${i + 1}`}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
                                   <td>{date.toLocaleDateString()}</td>
                                   <td>{dieselPerReceipt}</td>
                                   <td>Auto</td>
@@ -231,6 +289,6 @@ const DieselAllotment = () => {
       </div>
     </div>
   );
-}; // Add this closing bracket
+};
 
 export default DieselAllotment;
