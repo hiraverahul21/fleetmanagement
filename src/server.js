@@ -1239,10 +1239,6 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
 
       // Insert diesel details for each weekly record
       for (const detail of allotment.diesel_details) {
-        if (!detail.vendor_id || !detail.receipt_book_id || !detail.receipt_number) {
-          continue; // Skip invalid details
-        }
-
         await connection.execute(
           `INSERT INTO diesel_allotment_details 
           (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status) 
@@ -1250,21 +1246,23 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
           [
             allotmentId,
             detail.date,
-            detail.vendor_id,
-            detail.receipt_book_id,
-            detail.receipt_number,
+            detail.vendor_id || null,
+            detail.receipt_book_id || null,
+            detail.receipt_number || null,
             detail.diesel_qty,
             'active'
           ]
         );
 
-        // Update receipt book balance
-        await connection.execute(
-          `UPDATE diesel_receipts 
-           SET receipts_balance = receipts_balance - 1 
-           WHERE receipt_book_id = ? AND receipts_balance > 0`,
-          [detail.receipt_book_id]
-        );
+        // Update receipt book balance only if receipt details are provided
+        if (detail.receipt_book_id && detail.receipt_number) {
+          await connection.execute(
+            `UPDATE diesel_receipts 
+             SET receipts_balance = receipts_balance - 1 
+             WHERE receipt_book_id = ? AND receipts_balance > 0`,
+            [detail.receipt_book_id]
+          );
+        }
       }
     }
 
