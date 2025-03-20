@@ -180,8 +180,10 @@ const DieselAllotment = () => {
   // Add with other state declarations at the top
   const [selectedReceiptNumbers, setSelectedReceiptNumbers] = useState({});
   
-  // Add this function with your other handlers before the return statement
-  // Update the handleReceiptNumberChange function
+  // Add this state with other state declarations at the top
+  const [pendingAllotments, setPendingAllotments] = useState({});
+  
+  // Add this function before the return statement
   const handleReceiptNumberChange = (receiptNumber, allotmentId, index) => {
     // Check if this receipt number is already selected in another row
     const isAlreadySelected = Object.entries(selectedReceiptNumbers).some(
@@ -203,7 +205,45 @@ const DieselAllotment = () => {
     }));
   };
 
-  // Keep only the expanded row section inside the return statement's allotments.map
+  const handleSaveAllotment = async () => {
+    try {
+      const allotmentsToSave = allotments.map(allotment => {
+        const weeklyDates = getWeeklyDates(selectedYear, selectedMonth);
+        const subRows = weeklyDates.map((date, index) => ({
+          date: date.toISOString(),
+          vendor_id: selectedVendors[`${allotment.id}_${index}`],
+          receipt_book_id: selectedReceiptBooks[`${allotment.id}_${index}`],
+          receipt_number: selectedReceiptNumbers[`${allotment.id}_${index}`],
+          diesel_qty: calculateDieselPerReceipt(
+            Math.round(allotment.monthly_kms / allotment.vehicle_average),
+            weeklyDates.length
+          ),
+          status: 'Active'
+        }));
+  
+        return {
+          allotment_id: allotment.id,
+          vehicle_no: allotment.vehicle_no,
+          year: selectedYear,
+          month: selectedMonth,
+          company_route_id: allotment.company_route_id,
+          monthly_kms: allotment.monthly_kms,
+          vehicle_average: allotment.vehicle_average,
+          diesel_details: subRows
+        };
+      });
+  
+      const response = await axios.post('http://localhost:5000/api/diesel-allotments/save', allotmentsToSave);
+      alert('Allotments saved successfully!');
+      fetchAllotments(); // Refresh the data
+    } catch (error) {
+      console.error('Error saving allotments:', error);
+      alert('Failed to save allotments');
+    }
+  };
+  
+  // Update the Add Allotment button in the return statement
+  // Update the return statement structure
   return (
     <div className="diesel-allotment-container">
       <div className="allotment-header">
@@ -245,7 +285,7 @@ const DieselAllotment = () => {
             />
           </div>
         </div>
-        <button className="add-allotment-btn">
+        <button className="add-allotment-btn" onClick={handleSaveAllotment}>
           <i className="fas fa-plus"></i> Add Allotment
         </button>
       </div>

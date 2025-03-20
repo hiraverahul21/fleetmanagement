@@ -1208,6 +1208,75 @@ app.get('/api/diesel-receipts/:receiptBookId/numbers', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Add new endpoint to save diesel allotments
+app.post('/api/diesel-allotments/save', async (req, res) => {
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    for (const allotment of req.body) {
+      // Insert main allotment record
+      const [result] = await connection.execute(
+        `INSERT INTO diesel_allotments 
+        (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          allotment.vehicle_no,
+          allotment.year,
+          allotment.month,
+          allotment.company_route_id,
+          allotment.monthly_kms,
+          allotment.vehicle_average
+        ]
+      );
+
+      const allotmentId = result.insertId;
+
+      // Insert diesel details for each weekly record
+      for (const detail of allotment.diesel_details) {
+        await connection.execute(
+          `INSERT INTO diesel_allotment_details 
+          (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status) 
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            allotmentId,
+            detail.date,
+            detail.vendor_id,
+            detail.receipt_book_id,
+            detail.receipt_number,
+            detail.diesel_qty,
+            detail.status
+          ]
+        );
+
+        // Update receipt book balance if receipt number is used
+        if (detail.receipt_book_id && detail.receipt_number) {
+          await connection.execute(
+            `UPDATE diesel_receipts 
+             SET receipts_balance = receipts_balance - 1 
+             WHERE receipt_book_id = ?`,
+            [detail.receipt_book_id]
+          );
+        }
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: 'Diesel allotments saved successfully' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Error saving diesel allotments:', error);
+    res.status(500).json({ error: 'Failed to save diesel allotments' });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+});
+
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
