@@ -1208,33 +1208,41 @@ app.get('/api/diesel-receipts/:receiptBookId/numbers', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// Add new endpoint to save diesel allotments
+// Update the save diesel allotments endpoint
 app.post('/api/diesel-allotments/save', async (req, res) => {
   let connection;
   try {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
+    const savedAllotments = [];
+
     for (const allotment of req.body) {
       // Insert main allotment record
       const [result] = await connection.execute(
         `INSERT INTO diesel_allotments 
-        (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average) 
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           allotment.vehicle_no,
           allotment.year,
           allotment.month,
           allotment.company_route_id,
           allotment.monthly_kms,
-          allotment.vehicle_average
+          allotment.vehicle_average,
+          'active'
         ]
       );
 
       const allotmentId = result.insertId;
+      savedAllotments.push(allotmentId);
 
       // Insert diesel details for each weekly record
       for (const detail of allotment.diesel_details) {
+        if (!detail.vendor_id || !detail.receipt_book_id || !detail.receipt_number) {
+          continue; // Skip invalid details
+        }
+
         await connection.execute(
           `INSERT INTO diesel_allotment_details 
           (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status) 
@@ -1246,30 +1254,36 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
             detail.receipt_book_id,
             detail.receipt_number,
             detail.diesel_qty,
-            detail.status
+            'active'
           ]
         );
 
-        // Update receipt book balance if receipt number is used
-        if (detail.receipt_book_id && detail.receipt_number) {
-          await connection.execute(
-            `UPDATE diesel_receipts 
-             SET receipts_balance = receipts_balance - 1 
-             WHERE receipt_book_id = ?`,
-            [detail.receipt_book_id]
-          );
-        }
+        // Update receipt book balance
+        await connection.execute(
+          `UPDATE diesel_receipts 
+           SET receipts_balance = receipts_balance - 1 
+           WHERE receipt_book_id = ? AND receipts_balance > 0`,
+          [detail.receipt_book_id]
+        );
       }
     }
 
     await connection.commit();
-    res.json({ message: 'Diesel allotments saved successfully' });
+    res.json({ 
+      success: true,
+      message: 'Diesel allotments saved successfully',
+      allotmentIds: savedAllotments 
+    });
   } catch (error) {
     if (connection) {
       await connection.rollback();
     }
     console.error('Error saving diesel allotments:', error);
-    res.status(500).json({ error: 'Failed to save diesel allotments' });
+    res.status(500).json({ 
+      success: false,
+      error: error.message || 'Failed to save diesel allotments',
+      details: error.sqlMessage || error.message
+    });
   } finally {
     if (connection) {
       connection.release();
