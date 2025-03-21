@@ -83,6 +83,24 @@ const DieselEditAllotment = () => {
               readOnly
               className="days-input"
             />
+            <button 
+              className="update-allotment-btn"
+              onClick={() => handleUpdateAllotment()}
+              style={{
+                backgroundColor: '#ff8c00',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginLeft: '20px'
+              }}
+            >
+              <i className="fas fa-sync"></i> Update Allotment
+            </button>
           </div>
         </div>
       </div>
@@ -92,3 +110,14 @@ const DieselEditAllotment = () => {
 };
 
 export default DieselEditAllotment;
+
+// Add this function before the return statement
+const handleUpdateAllotment = async () => {
+  try {
+    // TODO: Implement update logic
+    console.log('Update allotment clicked');
+  } catch (error) {
+    console.error('Error updating allotment:', error);
+    alert('Failed to update allotment');
+  }
+};
