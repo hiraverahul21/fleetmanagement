@@ -1221,7 +1221,7 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     // Record the allotment period
     await connection.execute(
       `INSERT IGNORE INTO diesel_allotment_periods (year, month) VALUES (?, ?)`,
-      [year, month]
+      [year, parseInt(month)+1]
     );
     for (const allotment of req.body) {
       // Insert main allotment record
@@ -1232,7 +1232,7 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
         [
           allotment.vehicle_no,
           allotment.year,
-          allotment.month,
+          parseInt(allotment.month) + 1,
           allotment.company_route_id,
           allotment.monthly_kms,
           allotment.vehicle_average,
