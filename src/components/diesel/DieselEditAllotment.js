@@ -31,6 +31,7 @@ const DieselEditAllotment = () => {
     return months;
   };
 
+  // Update the fetchAllotments response handling
   const fetchAllotments = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/diesel-allotments`, {
@@ -39,20 +40,31 @@ const DieselEditAllotment = () => {
           month: selectedMonth + 1
         }
       });
-      console.log('Fetched allotments:', response.data);
-      setAllotments(response.data);
+      // Transform the data to ensure proper date formatting
+      const formattedAllotments = response.data.map(allotment => ({
+        ...allotment,
+        year: allotment.year || selectedYear,
+        month: allotment.month || (selectedMonth + 1)
+      }));
+      setAllotments(formattedAllotments);
     } catch (error) {
       console.error('Error fetching allotments:', error);
     }
   };
 
+  // Update the fetchAllotmentDetails to handle the response properly
   const fetchAllotmentDetails = async (allotmentId) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/diesel-allotments/details/${allotmentId}`);
-      console.log('Fetched details:', response.data);
+      const formattedDetails = response.data.map(detail => ({
+        ...detail,
+        date: detail.date ? new Date(detail.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        diesel_qty: detail.diesel_qty || 0,
+        status: detail.status || 'Auto'
+      }));
       setAllotmentDetails(prev => ({
         ...prev,
-        [allotmentId]: response.data
+        [allotmentId]: formattedDetails
       }));
     } catch (error) {
       console.error('Error fetching allotment details:', error);
@@ -76,6 +88,16 @@ const DieselEditAllotment = () => {
     if (monthIndex === undefined || monthIndex < 0 || monthIndex >= 12) return '';
     const date = new Date(year, monthIndex);
     return date.toLocaleString('default', { month: 'short' }) + '-' + year;
+  };
+
+  const handleUpdateAllotment = async () => {
+    try {
+      // TODO: Implement update logic
+      console.log('Update allotment clicked');
+    } catch (error) {
+      console.error('Error updating allotment:', error);
+      alert('Failed to update allotment');
+    }
   };
 
   return (
@@ -188,7 +210,7 @@ const DieselEditAllotment = () => {
                     </button>
                   </td>
                 </tr>
-                {expandedRows.has(allotment.id) && (
+                {expandedRows.has(allotment.id) && allotmentDetails[allotment.id]?.length > 0 && (
                   <tr className="details-row">
                     <td colSpan="14">
                       <table className="inner-table">
@@ -245,13 +267,3 @@ const DieselEditAllotment = () => {
 };
 
 export default DieselEditAllotment;
-
-const handleUpdateAllotment = async () => {
-  try {
-    // TODO: Implement update logic
-    console.log('Update allotment clicked');
-  } catch (error) {
-    console.error('Error updating allotment:', error);
-    alert('Failed to update allotment');
-  }
-};
