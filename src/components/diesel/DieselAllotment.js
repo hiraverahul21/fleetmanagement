@@ -11,7 +11,35 @@ const DieselAllotment = () => {
   const [pumpDetails, setPumpDetails] = useState({});
   const [vendors, setVendors] = useState([]);
   const [receiptBooks, setReceiptBooks] = useState([]);
+// ... existing state declarations ...
 
+const handleMonthChange = async (e) => {
+  const newMonth = parseInt(e.target.value);
+  
+  try {
+    // Check if allotment already exists for this period
+    const response = await axios.get(`http://localhost:5000/api/diesel-allotments/check-period`, {
+      params: {
+        year: selectedYear,
+        month: newMonth + 1 // Adding 1 because months are 0-based in JavaScript
+      }
+    });
+
+    if (response.data.exists) {
+      alert(`Diesel allotment already exists for ${selectedYear}-${getMonthsForYear(selectedYear)[newMonth].label}`);
+      return;
+    }
+
+    setSelectedMonth(newMonth);
+    const days = new Date(selectedYear, newMonth + 1, 0).getDate();
+    setDaysInMonth(days);
+    await fetchAllotments();
+    
+  } catch (error) {
+    console.error('Error checking allotment period:', error);
+    alert('Error occurred while checking allotment period');
+  }
+};
   // Add the helper function here, before the other functions
   const getWeeklyDates = (year, month) => {
     const dates = [];
@@ -266,7 +294,7 @@ const DieselAllotment = () => {
             <select
               id="monthSelect"
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              onChange={handleMonthChange}
               className="month-dropdown"
             >
               {getMonthsForYear(selectedYear).map((month) => (
