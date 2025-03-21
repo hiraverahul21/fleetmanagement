@@ -71,14 +71,15 @@ const Navigation = ({ onMenuSelect }) => {
       submenu: [
         { id: 'diesel-vendors', label: 'Diesel Vendor', icon: 'store' },
         { id: 'diesel-receipts', label: 'Diesel Receipts', icon: 'receipt' },
-        { id: 'diesel-allotment', label: 'Diesel Allotment', icon: 'fill-drip' }
+        { id: 'diesel-allotment', label: 'Diesel Allotment', icon: 'fill-drip' },
+        { id: 'diesel-edit-allotment', label: 'Edit Diesel Allotment', icon: 'edit', path: '/dashboard/diesel/edit-allotment' }
       ]
     },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
   ];
   
   // Add state for modal
-  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [showAddCompanyModal, setShowCompanyModal] = useState(false);
   
   // Update handleSubmenuClick function
   const handleSubmenuClick = (parentItem, submenuItem, e) => {
@@ -128,6 +129,8 @@ const Navigation = ({ onMenuSelect }) => {
         navigate('/dashboard/diesel/receipts');
       } else if (submenuItem.id === 'diesel-allotment') {
         navigate('/dashboard/diesel/allotment');
+      } else if (submenuItem.path === '/dashboard/diesel/edit-allotment') {
+        navigate('/dashboard/diesel/edit-allotment');
       }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
