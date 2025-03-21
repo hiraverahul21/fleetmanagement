@@ -235,6 +235,19 @@ const handleMonthChange = async (e) => {
 
   const handleSaveAllotment = async () => {
     try {
+      // Check if allotment already exists for this period
+      const checkResponse = await axios.get(`http://localhost:5000/api/diesel-allotments/check-period`, {
+        params: {
+          year: selectedYear,
+          month: selectedMonth + 1 // Adding 1 because months are 0-based in JavaScript
+        }
+      });
+  
+      if (checkResponse.data.exists) {
+        alert(`Diesel allotment already exists for ${selectedYear}-${getMonthsForYear(selectedYear)[selectedMonth].label}`);
+        return;
+      }
+  
       const allotmentsToSave = allotments.map(allotment => {
         const weeklyDates = getWeeklyDates(selectedYear, selectedMonth);
         const subRows = weeklyDates.map((date, index) => ({
