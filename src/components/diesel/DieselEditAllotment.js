@@ -6,6 +6,13 @@ const DieselEditAllotment = () => {
   const [allotments, setAllotments] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [daysInMonth, setDaysInMonth] = useState(31);
+
+  // Add useEffect to update days when month/year changes
+  useEffect(() => {
+    const days = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    setDaysInMonth(days);
+  }, [selectedYear, selectedMonth]);
 
   const getMonthsForYear = (year) => {
     const months = [];
@@ -68,6 +75,14 @@ const DieselEditAllotment = () => {
                 </option>
               ))}
             </select>
+            <label htmlFor="daysInMonth">Days in Month:</label>
+            <input
+              id="daysInMonth"
+              type="text"
+              value={daysInMonth}
+              readOnly
+              className="days-input"
+            />
           </div>
         </div>
       </div>
