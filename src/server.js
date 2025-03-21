@@ -1216,7 +1216,13 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     await connection.beginTransaction();
 
     const savedAllotments = [];
+    const { year, month } = req.body[0]; // Get year and month from first allotment
 
+    // Record the allotment period
+    await connection.execute(
+      `INSERT IGNORE INTO diesel_allotment_periods (year, month) VALUES (?, ?)`,
+      [year, month]
+    );
     for (const allotment of req.body) {
       // Insert main allotment record
       const [result] = await connection.execute(
@@ -1270,7 +1276,8 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     res.json({ 
       success: true,
       message: 'Diesel allotments saved successfully',
-      allotmentIds: savedAllotments 
+      allotmentIds: savedAllotments,
+      period: { year, month }
     });
   } catch (error) {
     if (connection) {
@@ -1288,7 +1295,23 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     }
   }
 });
-
+// Add new endpoint to check if allotment exists for a period
+app.get('/api/diesel-allotments/check-period', async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    const [rows] = await db.query(
+      'SELECT * FROM diesel_allotment_periods WHERE year = ? AND month = ?',
+      [year, month]
+    );
+    res.json({ 
+      exists: rows.length > 0,
+      period: rows[0] || null
+    });
+  } catch (error) {
+    console.error('Error checking allotment period:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
