@@ -21,48 +21,61 @@
   gap: 8px;
 }
 
-.allotment-content table {
+.allotment-table {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.allotment-content th,
-.allotment-content td {
-  padding: 12px;
+th, td {
+  padding: 8px;
+  border: 1px solid #ddd;
   text-align: left;
-  border-bottom: 1px solid #ddd;
 }
 
-.allotment-content th {
-  background-color: #f4f4f4;
-  font-weight: 600;
+th {
+  background-color: #f5f5f5;
 }
 
-.allotment-content table tbody tr td {
-  font-weight: 600;  /* Makes the main row text bold */
+.expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
 }
 
-/* Keep sub-table text normal weight */
-.sub-table tbody tr td {
-  font-weight: normal;
+.details-row {
+  background-color: #f9f9f9;
 }
 
-.action-btn {
-  padding: 6px 12px;
-  margin: 0 4px;
+.inner-table {
+  margin: 10px 0;
+}
+
+.inner-table select {
+  width: 100%;
+  padding: 4px;
+}
+
+.edit-btn, .delete-btn {
+  padding: 4px 8px;
+  margin: 0 2px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.action-btn.edit {
-  background-color: #2196F3;
+.edit-btn {
+  background-color: #4CAF50;
   color: white;
 }
 
-.action-btn.delete {
+.delete-btn {
   background-color: #f44336;
   color: white;
 }
@@ -125,23 +138,35 @@
   cursor: not-allowed;
 }
 
+.sub-row {
+  background-color: #f5f5f5;
+}
+
 .expand-btn {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2em;
-  padding: 0 8px;
+  font-size: 18px;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
 }
 
 .expand-btn:hover {
-  background-color: #e9ecef;
+  background-color: #e0e0e0;
+}
+
+.action-btn {
+  padding: 5px 10px;
+  margin: 0 2px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action-btn.edit {
+  background-color: #4CAF50;
+  color: white;
 }
 
 .expanded-row {
