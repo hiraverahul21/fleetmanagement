@@ -210,7 +210,7 @@ const DieselEditAllotment = () => {
                     </button>
                   </td>
                 </tr>
-                {expandedRows.has(allotment.id) && allotmentDetails[allotment.id]?.length > 0 && (
+                {expandedRows.has(allotment.id) && (
                   <tr className="details-row">
                     <td colSpan="14">
                       <table className="inner-table">
@@ -229,9 +229,10 @@ const DieselEditAllotment = () => {
                           {allotmentDetails[allotment.id]?.map((detail, index) => (
                             <tr key={index}>
                               <td>
-                                <select defaultValue="">
+                                <select defaultValue={detail.pump || ""}>
                                   <option value="">Select Pump</option>
-                                  {/* Add pump options here */}
+                                  <option value="pump1">Pump 1</option>
+                                  <option value="pump2">Pump 2</option>
                                 </select>
                               </td>
                               <td>
