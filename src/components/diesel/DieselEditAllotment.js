@@ -31,16 +31,41 @@ const DieselEditAllotment = () => {
     return months;
   };
 
-  // Update the fetchAllotments response handling
+  // Add new state for period check
+  const [periodExists, setPeriodExists] = useState(false);
+  
+  // Add new function to check period
+  const checkAllotmentPeriod = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/diesel-allotments/check-period', {
+        params: {
+          year: selectedYear,
+          month: selectedMonth + 1
+        }
+      });
+      setPeriodExists(response.data.exists);
+      return response.data.exists;
+    } catch (error) {
+      console.error('Error checking allotment period:', error);
+      return false;
+    }
+  };
+  
+  // Update fetchAllotments to check period first
   const fetchAllotments = async () => {
     try {
+      const exists = await checkAllotmentPeriod();
+      if (!exists) {
+        setAllotments([]);
+        return;
+      }
+  
       const response = await axios.get(`http://localhost:5000/api/diesel-allotments`, {
         params: {
           year: selectedYear,
           month: selectedMonth + 1
         }
       });
-      // Transform the data to ensure proper date formatting
       const formattedAllotments = response.data.map(allotment => ({
         ...allotment,
         year: allotment.year || selectedYear,

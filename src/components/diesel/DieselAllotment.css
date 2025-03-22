@@ -231,3 +231,13 @@ th {
   border-radius: 4px;
   background-color: white;
 }
+
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin: 20px 0;
+}
