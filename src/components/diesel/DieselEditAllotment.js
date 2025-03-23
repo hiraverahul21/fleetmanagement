@@ -78,14 +78,34 @@ const DieselEditAllotment = () => {
   };
 
   // Update the fetchAllotmentDetails to handle the response properly
+  // Add state for vendors
+  const [vendors, setVendors] = useState([]);
+  
+  // Add useEffect to fetch vendors
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/diesel-vendors/active-receipts');
+        setVendors(response.data);
+      } catch (error) {
+        console.error('Error fetching vendors:', error);
+      }
+    };
+    fetchVendors();
+  }, []);
+  
+  // Update the fetchAllotmentDetails function
   const fetchAllotmentDetails = async (allotmentId) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/diesel-allotments/details/${allotmentId}`);
       const formattedDetails = response.data.map(detail => ({
         ...detail,
         date: detail.date ? new Date(detail.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        vendor_id: detail.vendor_id || '',
+        receipt_book_id: detail.receipt_book_id || '',
+        receipt_number: detail.receipt_number || '',
         diesel_qty: detail.diesel_qty || 0,
-        status: detail.status || 'Auto'
+        status: detail.status || 'Active'
       }));
       setAllotmentDetails(prev => ({
         ...prev,
@@ -95,7 +115,38 @@ const DieselEditAllotment = () => {
       console.error('Error fetching allotment details:', error);
     }
   };
-
+  
+  // Move the table body rendering inside the return statement
+  const renderDetailsTableBody = (allotment) => {
+    return allotmentDetails[allotment.id]?.map((detail, index) => (
+      <tr key={index}>
+        <td>
+          <select defaultValue={detail.vendor_id || ""}>
+            <option value="">Select Pump</option>
+            {vendors.map(vendor => (
+              <option key={vendor.id} value={vendor.id}>
+                {vendor.name}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td>
+          <select defaultValue={detail.receipt_book_id || ""}>
+            <option value="">Select Receipt Book</option>
+          </select>
+        </td>
+        <td>
+          <select defaultValue={detail.receipt_number || ""}>
+            <option value="">Select Receipt No</option>
+          </select>
+        </td>
+        <td>{new Date(detail.date).toLocaleDateString()}</td>
+        <td>{detail.diesel_qty}</td>
+        <td>{detail.status}</td>
+        <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
+      </tr>
+    ));
+  };
   const toggleRow = async (allotmentId) => {
     const newExpandedRows = new Set(expandedRows);
     if (newExpandedRows.has(allotmentId)) {
@@ -253,33 +304,7 @@ const DieselEditAllotment = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {allotmentDetails[allotment.id]?.map((detail, index) => (
-                            <tr key={index}>
-                              <td>
-                                <select defaultValue={detail.pump || ""}>
-                                  <option value="">Select Pump</option>
-                                  <option value="pump1">Pump 1</option>
-                                  <option value="pump2">Pump 2</option>
-                                </select>
-                              </td>
-                              <td>
-                                <select defaultValue="">
-                                  <option value="">Select Receipt Book</option>
-                                  {/* Add receipt book options here */}
-                                </select>
-                              </td>
-                              <td>
-                                <select defaultValue="">
-                                  <option value="">Select Receipt No</option>
-                                  {/* Add receipt number options here */}
-                                </select>
-                              </td>
-                              <td>{new Date(detail.date).toLocaleDateString()}</td>
-                              <td>{detail.diesel_qty}</td>
-                              <td>{detail.status || 'Auto'}</td>
-                              <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
-                            </tr>
-                          ))}
+                          {renderDetailsTableBody(allotment)}
                         </tbody>
                       </table>
                     </td>

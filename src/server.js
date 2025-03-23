@@ -1319,6 +1319,26 @@ app.get('/api/diesel-allotments/check-period', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Add this endpoint to get diesel allotment details
+app.get('/api/diesel-allotments/details/:allotmentId', async (req, res) => {
+  try {
+    const { allotmentId } = req.params;
+    const [rows] = await db.query(`
+      SELECT 
+        dad.*,
+        dv.name as vendor_name
+      FROM diesel_allotment_details dad
+      LEFT JOIN diesel_vendors dv ON dad.vendor_id = dv.id
+      WHERE dad.allotment_id = ?
+      ORDER BY dad.date
+    `, [allotmentId]);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching allotment details:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
