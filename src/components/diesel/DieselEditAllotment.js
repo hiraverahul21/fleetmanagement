@@ -117,11 +117,48 @@ const DieselEditAllotment = () => {
   };
   
   // Move the table body rendering inside the return statement
+  // Add new state for receipt books and receipt numbers
+  const [receiptBooks, setReceiptBooks] = useState({});
+  const [receiptNumbers, setReceiptNumbers] = useState({});
+  
+  // Add function to fetch receipt books for a vendor
+  const fetchReceiptBooks = async (vendorId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${vendorId}`);
+      setReceiptBooks(prev => ({
+        ...prev,
+        [vendorId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching receipt books:', error);
+    }
+  };
+  
+  // Add function to fetch receipt numbers for a receipt book
+  const fetchReceiptNumbers = async (receiptBookId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
+      setReceiptNumbers(prev => ({
+        ...prev,
+        [receiptBookId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching receipt numbers:', error);
+    }
+  };
+  
+  // Update the renderDetailsTableBody function
   const renderDetailsTableBody = (allotment) => {
     return allotmentDetails[allotment.id]?.map((detail, index) => (
       <tr key={index}>
         <td>
-          <select defaultValue={detail.vendor_id || ""}>
+          <select 
+            defaultValue={detail.vendor_id || ""}
+            onChange={(e) => {
+              const vendorId = e.target.value;
+              if (vendorId) fetchReceiptBooks(vendorId);
+            }}
+          >
             <option value="">Select Pump</option>
             {vendors.map(vendor => (
               <option key={vendor.id} value={vendor.id}>
@@ -131,13 +168,29 @@ const DieselEditAllotment = () => {
           </select>
         </td>
         <td>
-          <select defaultValue={detail.receipt_book_id || ""}>
+          <select 
+            defaultValue={detail.receipt_book_id || ""}
+            onChange={(e) => {
+              const bookId = e.target.value;
+              if (bookId) fetchReceiptNumbers(bookId);
+            }}
+          >
             <option value="">Select Receipt Book</option>
+            {receiptBooks[detail.vendor_id]?.map(book => (
+              <option key={book.receipt_book_id} value={book.receipt_book_id}>
+                {book.receipt_book_id}
+              </option>
+            ))}
           </select>
         </td>
         <td>
           <select defaultValue={detail.receipt_number || ""}>
             <option value="">Select Receipt No</option>
+            {receiptNumbers[detail.receipt_book_id]?.map(number => (
+              <option key={number.value} value={number.value}>
+                {number.label}
+              </option>
+            ))}
           </select>
         </td>
         <td>{new Date(detail.date).toLocaleDateString()}</td>

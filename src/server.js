@@ -1220,7 +1220,7 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
 
     await connection.execute(
       `INSERT IGNORE INTO diesel_allotment_periods (year, month) VALUES (?, ?)`,
-      [year, parseInt(month)+1]
+      [year, parseInt(month)]
     );
 
     for (const allotment of req.body) {
