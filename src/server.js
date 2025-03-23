@@ -1234,7 +1234,7 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
         [
           allotment.vehicle_no,
           allotment.year,
-          parseInt(allotment.month) + 1,
+          parseInt(allotment.month),
           allotment.company_route_id,
           allotment.monthly_kms,
           allotment.vehicle_average,
