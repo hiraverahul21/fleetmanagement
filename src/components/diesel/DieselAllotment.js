@@ -235,11 +235,10 @@ const handleMonthChange = async (e) => {
 
   const handleSaveAllotment = async () => {
     try {
-      // Check if allotment already exists for this period
       const checkResponse = await axios.get(`http://localhost:5000/api/diesel-allotments/check-period`, {
         params: {
           year: selectedYear,
-          month: selectedMonth + 1 // Adding 1 because months are 0-based in JavaScript
+          month: selectedMonth + 1
         }
       });
   
@@ -259,24 +258,39 @@ const handleMonthChange = async (e) => {
             Math.round(allotment.monthly_kms / allotment.vehicle_average),
             weeklyDates.length
           ),
-          status: 'Active'
+          status: 'active'
         }));
   
-        return {
-          allotment_id: allotment.id,
+        // Calculate diesel_require value
+        const dieselRequire = allotment.monthly_kms && allotment.vehicle_average 
+          ? Math.round(allotment.monthly_kms / allotment.vehicle_average)
+          : 0;
+  
+        // Create main allotment object with all required fields
+        const mainAllotment = {
           vehicle_no: allotment.vehicle_no,
           year: selectedYear,
-          month: selectedMonth,
+          month: selectedMonth + 1,
           company_route_id: allotment.company_route_id,
           monthly_kms: allotment.monthly_kms,
           vehicle_average: allotment.vehicle_average,
+          status: 'active',
+          // Add the missing fields
+          no_of_days: daysInMonth,
+          route_name: allotment.route_name || '',
+          actual_kms: allotment.actual_kms || 0,
+          vehicle_capacity: allotment.vehicle_capacity || 0,
+          diesel_require: dieselRequire,
+          supervisor_name: allotment.supervisor_name || 'Not Assigned',
           diesel_details: subRows
         };
+  
+        return mainAllotment;
       });
   
       const response = await axios.post('http://localhost:5000/api/diesel-allotments/save', allotmentsToSave);
       alert('Allotments saved successfully!');
-      fetchAllotments(); // Refresh the data
+      fetchAllotments();
     } catch (error) {
       console.error('Error saving allotments:', error);
       alert('Failed to save allotments');
@@ -331,10 +345,11 @@ const handleMonthChange = async (e) => {
         </button>
       </div>
       <div className="allotment-content">
-        <table>
+        <table>          
           <thead>
             <tr>
               <th></th>
+              <th>Package Id</th>
               <th>Vehicle No</th>
               <th>Year</th>
               <th>Allotment Month</th>
@@ -353,6 +368,7 @@ const handleMonthChange = async (e) => {
           <tbody>
             {allotments.map((allotment) => (
               <React.Fragment key={allotment.id}>
+                
                 <tr>
                   <td>
                     <button 
@@ -362,6 +378,7 @@ const handleMonthChange = async (e) => {
                       {expandedRows.has(allotment.id) ? '−' : '+'}
                     </button>
                   </td>
+                  <td>{allotment.id || 'N/A'}</td>
                   <td>{allotment.vehicle_no}</td>
                   <td>{selectedYear}</td>
                   <td>{getMonthsForYear(selectedYear)[selectedMonth].label}</td>

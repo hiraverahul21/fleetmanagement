@@ -1216,19 +1216,21 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     await connection.beginTransaction();
 
     const savedAllotments = [];
-    const { year, month } = req.body[0]; // Get year and month from first allotment
+    const { year, month } = req.body[0];
 
-    // Record the allotment period
     await connection.execute(
       `INSERT IGNORE INTO diesel_allotment_periods (year, month) VALUES (?, ?)`,
       [year, parseInt(month)+1]
     );
+
     for (const allotment of req.body) {
-      // Insert main allotment record
+      // Insert main allotment record with additional fields
       const [result] = await connection.execute(
         `INSERT INTO diesel_allotments 
-        (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average, 
+         no_of_days, route_name, actual_kms, vehicle_capacity, diesel_require, 
+         supervisor_name, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           allotment.vehicle_no,
           allotment.year,
@@ -1236,6 +1238,12 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
           allotment.company_route_id,
           allotment.monthly_kms,
           allotment.vehicle_average,
+          allotment.no_of_days,
+          allotment.route_name,
+          allotment.actual_kms,
+          allotment.vehicle_capacity,
+          allotment.diesel_require,
+          allotment.supervisor_name,
           'active'
         ]
       );
@@ -1243,7 +1251,7 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
       const allotmentId = result.insertId;
       savedAllotments.push(allotmentId);
 
-      // Insert diesel details for each weekly record
+      // Rest of the code remains the same
       for (const detail of allotment.diesel_details) {
         await connection.execute(
           `INSERT INTO diesel_allotment_details 
@@ -1260,7 +1268,6 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
           ]
         );
 
-        // Update receipt book balance only if receipt details are provided
         if (detail.receipt_book_id && detail.receipt_number) {
           await connection.execute(
             `UPDATE diesel_receipts 
