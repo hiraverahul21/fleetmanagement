@@ -250,7 +250,9 @@ const handleMonthChange = async (e) => {
       const allotmentsToSave = allotments.map(allotment => {
         const weeklyDates = getWeeklyDates(selectedYear, selectedMonth);
         const subRows = weeklyDates.map((date, index) => ({
-          date: date.toISOString(),
+          date: new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+            .toISOString()
+            .split('T')[0], // This will preserve the correct date
           vendor_id: selectedVendors[`${allotment.id}_${index}`],
           receipt_book_id: selectedReceiptBooks[`${allotment.id}_${index}`],
           receipt_number: selectedReceiptNumbers[`${allotment.id}_${index}`],
