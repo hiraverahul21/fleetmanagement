@@ -190,6 +190,7 @@ const DieselEditAllotment = () => {
           <thead>
             <tr>
               <th></th>
+              <th>Allotment ID</th>
               <th>Vehicle No</th>
               <th>Year</th>
               <th>Allotment Month</th>
@@ -214,6 +215,7 @@ const DieselEditAllotment = () => {
                       {expandedRows.has(allotment.id) ? '-' : '+'}
                     </button>
                   </td>
+                  <td>{allotment.id || 'N/A'}</td>
                   <td>{allotment.vehicle_no}</td>
                   <td>{allotment.year}</td>
                   <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
