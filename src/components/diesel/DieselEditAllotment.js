@@ -189,12 +189,25 @@ const DieselEditAllotment = () => {
   };
   
   // Update the toggleRow function
+  // Update the toggleRow function to fetch receipt data when expanding
   const toggleRow = async (allotmentId) => {
     const newExpandedRows = new Set(expandedRows);
     if (newExpandedRows.has(allotmentId)) {
       newExpandedRows.delete(allotmentId);
     } else {
       newExpandedRows.add(allotmentId);
+      // Fetch receipt data when expanding
+      const allotment = allotments.find(a => a.id === allotmentId);
+      if (allotment && allotment.details) {
+        for (const detail of allotment.details) {
+          if (detail.vendor_id) {
+            await fetchReceiptBooks(detail.vendor_id);
+            if (detail.receipt_book_id) {
+              await fetchReceiptNumbers(detail.receipt_book_id);
+            }
+          }
+        }
+      }
     }
     setExpandedRows(newExpandedRows);
   };
