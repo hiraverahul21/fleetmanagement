@@ -1224,13 +1224,13 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
     );
 
     for (const allotment of req.body) {
-      // Insert main allotment record with additional fields
+      // Fixed INSERT query - removed extra ? and aligned values
       const [result] = await connection.execute(
         `INSERT INTO diesel_allotments 
         (vehicle_no, year, month, company_route_id, monthly_kms, vehicle_average, 
          no_of_days, route_name, actual_kms, vehicle_capacity, diesel_require, 
-         supervisor_name, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         supervisor_name, status, package_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           allotment.vehicle_no,
           allotment.year,
@@ -1244,7 +1244,8 @@ app.post('/api/diesel-allotments/save', async (req, res) => {
           allotment.vehicle_capacity,
           allotment.diesel_require,
           allotment.supervisor_name,
-          'active'
+          'active',
+          allotment.id  // package_id
         ]
       );
 

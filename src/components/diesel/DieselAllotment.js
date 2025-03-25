@@ -270,6 +270,7 @@ const handleMonthChange = async (e) => {
   
         // Create main allotment object with all required fields
         const mainAllotment = {
+          id: allotment.id, // Add package_id
           vehicle_no: allotment.vehicle_no,
           year: selectedYear,
           month: selectedMonth + 1,
