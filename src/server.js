@@ -1340,6 +1340,58 @@ app.get('/api/diesel-allotments/details/:allotmentId', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/diesel-allotments/details', async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    
+    // First, get all main allotments
+    const [allotments] = await db.query(`
+      SELECT 
+        da.*,
+        p.id as package_id
+      FROM diesel_allotments da
+      LEFT JOIN packages p ON da.package_id = p.id
+      WHERE da.year = ? AND da.month = ? AND da.status = 'active'
+      ORDER BY da.id DESC
+    `, [year, month]);
+
+    // Then, get all details for these allotments
+    const allotmentIds = allotments.map(a => a.id);
+    if (allotmentIds.length > 0) {
+      const [details] = await db.query(`
+        SELECT 
+          dad.*,
+          dv.name as vendor_name
+        FROM diesel_allotment_details dad
+        LEFT JOIN diesel_vendors dv ON dad.vendor_id = dv.id
+        WHERE dad.allotment_id IN (?)
+        ORDER BY dad.date
+      `, [allotmentIds]);
+
+      // Group details by allotment_id
+      const detailsByAllotment = details.reduce((acc, detail) => {
+        if (!acc[detail.allotment_id]) {
+          acc[detail.allotment_id] = [];
+        }
+        acc[detail.allotment_id].push(detail);
+        return acc;
+      }, {});
+
+      // Combine allotments with their details
+      const result = allotments.map(allotment => ({
+        ...allotment,
+        details: detailsByAllotment[allotment.id] || []
+      }));
+
+      res.json(result);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Error fetching allotment details:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

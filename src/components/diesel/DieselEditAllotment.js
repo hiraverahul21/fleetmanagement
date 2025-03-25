@@ -9,6 +9,49 @@ const DieselEditAllotment = () => {
   const [daysInMonth, setDaysInMonth] = useState(31);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [allotmentDetails, setAllotmentDetails] = useState({});
+  // Add these state declarations
+  const [vendors, setVendors] = useState([]);
+  const [receiptBooks, setReceiptBooks] = useState({});
+  const [receiptNumbers, setReceiptNumbers] = useState({});
+  // const [periodExists, setPeriodExists] = useState(false);
+
+  // Add vendors fetch effect
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/diesel-vendors/active-receipts');
+        setVendors(response.data);
+      } catch (error) {
+        console.error('Error fetching vendors:', error);
+      }
+    };
+    fetchVendors();
+  }, []);
+
+  // Add these functions inside the component
+  const fetchReceiptBooks = async (vendorId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${vendorId}`);
+      setReceiptBooks(prev => ({
+        ...prev,
+        [vendorId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching receipt books:', error);
+    }
+  };
+
+  const fetchReceiptNumbers = async (receiptBookId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
+      setReceiptNumbers(prev => ({
+        ...prev,
+        [receiptBookId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching receipt numbers:', error);
+    }
+  };
 
   useEffect(() => {
     const days = new Date(selectedYear, selectedMonth + 1, 0).getDate();
@@ -52,6 +95,7 @@ const DieselEditAllotment = () => {
   };
   
   // Update fetchAllotments to check period first
+  // Update the fetchAllotments function
   const fetchAllotments = async () => {
     try {
       const exists = await checkAllotmentPeriod();
@@ -60,96 +104,23 @@ const DieselEditAllotment = () => {
         return;
       }
   
-      const response = await axios.get(`http://localhost:5000/api/diesel-allotments`, {
+      const response = await axios.get(`http://localhost:5000/api/diesel-allotments/details`, {
         params: {
           year: selectedYear,
           month: selectedMonth + 1
         }
       });
-      const formattedAllotments = response.data.map(allotment => ({
-        ...allotment,
-        year: allotment.year || selectedYear,
-        month: allotment.month || (selectedMonth + 1)
-      }));
-      setAllotments(formattedAllotments);
+      setAllotments(response.data);
     } catch (error) {
       console.error('Error fetching allotments:', error);
     }
   };
 
-  // Update the fetchAllotmentDetails to handle the response properly
-  // Add state for vendors
-  const [vendors, setVendors] = useState([]);
-  
-  // Add useEffect to fetch vendors
-  useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/diesel-vendors/active-receipts');
-        setVendors(response.data);
-      } catch (error) {
-        console.error('Error fetching vendors:', error);
-      }
-    };
-    fetchVendors();
-  }, []);
-  
-  // Update the fetchAllotmentDetails function
-  const fetchAllotmentDetails = async (allotmentId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/diesel-allotments/details/${allotmentId}`);
-      const formattedDetails = response.data.map(detail => ({
-        ...detail,
-        date: detail.date ? new Date(detail.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        vendor_id: detail.vendor_id || '',
-        receipt_book_id: detail.receipt_book_id || '',
-        receipt_number: detail.receipt_number || '',
-        diesel_qty: detail.diesel_qty || 0,
-        status: detail.status || 'Active'
-      }));
-      setAllotmentDetails(prev => ({
-        ...prev,
-        [allotmentId]: formattedDetails
-      }));
-    } catch (error) {
-      console.error('Error fetching allotment details:', error);
-    }
-  };
-  
-  // Move the table body rendering inside the return statement
-  // Add new state for receipt books and receipt numbers
-  const [receiptBooks, setReceiptBooks] = useState({});
-  const [receiptNumbers, setReceiptNumbers] = useState({});
-  
-  // Add function to fetch receipt books for a vendor
-  const fetchReceiptBooks = async (vendorId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${vendorId}`);
-      setReceiptBooks(prev => ({
-        ...prev,
-        [vendorId]: response.data
-      }));
-    } catch (error) {
-      console.error('Error fetching receipt books:', error);
-    }
-  };
-  
-  // Add function to fetch receipt numbers for a receipt book
-  const fetchReceiptNumbers = async (receiptBookId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
-      setReceiptNumbers(prev => ({
-        ...prev,
-        [receiptBookId]: response.data
-      }));
-    } catch (error) {
-      console.error('Error fetching receipt numbers:', error);
-    }
-  };
+  // Remove the separate fetchAllotmentDetails function as details are now included in the main response
   
   // Update the renderDetailsTableBody function
   const renderDetailsTableBody = (allotment) => {
-    return allotmentDetails[allotment.id]?.map((detail, index) => (
+    return allotment.details?.map((detail, index) => (
       <tr key={index}>
         <td>
           <select 
@@ -200,19 +171,18 @@ const DieselEditAllotment = () => {
       </tr>
     ));
   };
+  
+  // Update the toggleRow function
   const toggleRow = async (allotmentId) => {
     const newExpandedRows = new Set(expandedRows);
     if (newExpandedRows.has(allotmentId)) {
       newExpandedRows.delete(allotmentId);
     } else {
       newExpandedRows.add(allotmentId);
-      if (!allotmentDetails[allotmentId]) {
-        await fetchAllotmentDetails(allotmentId);
-      }
     }
     setExpandedRows(newExpandedRows);
   };
-
+  
   const getMonthLabel = (year, monthIndex) => {
     if (monthIndex === undefined || monthIndex < 0 || monthIndex >= 12) return '';
     const date = new Date(year, monthIndex);
@@ -290,11 +260,11 @@ const DieselEditAllotment = () => {
         </div>
       </div>
       <div className="allotment-table">
-        <table>
+        <table>         
           <thead>
             <tr>
               <th></th>
-              <th>Allotment ID</th>
+              <th>Package ID</th>
               <th>Vehicle No</th>
               <th>Year</th>
               <th>Allotment Month</th>
@@ -319,7 +289,7 @@ const DieselEditAllotment = () => {
                       {expandedRows.has(allotment.id) ? '-' : '+'}
                     </button>
                   </td>
-                  <td>{allotment.id || 'N/A'}</td>
+                  <td>{allotment.package_id || 'N/A'}</td>
                   <td>{allotment.vehicle_no}</td>
                   <td>{allotment.year}</td>
                   <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
