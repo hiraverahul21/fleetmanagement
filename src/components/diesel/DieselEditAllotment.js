@@ -333,6 +333,7 @@ const DieselEditAllotment = () => {
                       <table className="inner-table">
                         <thead>
                           <tr>
+                            <th>Allotment ID</th>
                             <th>Petrol Pump</th>
                             <th>Receipt Book ID</th>
                             <th>Receipt No</th>
