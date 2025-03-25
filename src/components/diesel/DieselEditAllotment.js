@@ -119,9 +119,25 @@ const DieselEditAllotment = () => {
   // Remove the separate fetchAllotmentDetails function as details are now included in the main response
   
   // Update the renderDetailsTableBody function
+  // Update the sub-table header
+  <thead>
+    <tr>
+      <th>Allotment ID</th>
+      <th>Petrol Pump</th>
+      <th>Receipt Book ID</th>
+      <th>Receipt No</th>
+      <th>Receipt Date</th>
+      <th>Diesel Qty</th>
+      <th>Status</th>
+      <th>Month</th>
+    </tr>
+  </thead>
+  
+  // Update the renderDetailsTableBody function
   const renderDetailsTableBody = (allotment) => {
     return allotment.details?.map((detail, index) => (
       <tr key={index}>
+        <td>{allotment.id}</td>
         <td>
           <select 
             defaultValue={detail.vendor_id || ""}
