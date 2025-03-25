@@ -140,10 +140,34 @@ const DieselEditAllotment = () => {
         <td>{allotment.id}</td>
         <td>
           <select 
-            defaultValue={detail.vendor_id || ""}
-            onChange={(e) => {
+            value={detail.vendor_id || ""}
+            onChange={async (e) => {
               const vendorId = e.target.value;
-              if (vendorId) fetchReceiptBooks(vendorId);
+              // Update the detail object with new vendor_id
+              detail.vendor_id = vendorId;
+              
+              if (vendorId) {
+                try {
+                  const receiptBooksResponse = await axios.get(`http://localhost:5000/api/diesel-receipts/${vendorId}`);
+                  setReceiptBooks(prev => ({
+                    ...prev,
+                    [vendorId]: receiptBooksResponse.data
+                  }));
+  
+                  if (receiptBooksResponse.data && receiptBooksResponse.data.length > 0) {
+                    const firstBookId = receiptBooksResponse.data[0].receipt_book_id;
+                    const receiptNumbersResponse = await axios.get(`http://localhost:5000/api/diesel-receipts/${firstBookId}/numbers`);
+                    setReceiptNumbers(prev => ({
+                      ...prev,
+                      [firstBookId]: receiptNumbersResponse.data
+                    }));
+                  }
+                } catch (error) {
+                  console.error('Error fetching receipt details:', error);
+                }
+              }
+              // Force a re-render by updating allotments state
+              setAllotments(prev => [...prev]);
             }}
           >
             <option value="">Select Pump</option>
@@ -156,10 +180,25 @@ const DieselEditAllotment = () => {
         </td>
         <td>
           <select 
-            defaultValue={detail.receipt_book_id || ""}
-            onChange={(e) => {
+            value={detail.receipt_book_id || ""}
+            onChange={async (e) => {
               const bookId = e.target.value;
-              if (bookId) fetchReceiptNumbers(bookId);
+              // Update the detail object with new receipt_book_id
+              detail.receipt_book_id = bookId;
+              
+              if (bookId) {
+                try {
+                  const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${bookId}/numbers`);
+                  setReceiptNumbers(prev => ({
+                    ...prev,
+                    [bookId]: response.data
+                  }));
+                } catch (error) {
+                  console.error('Error fetching receipt numbers:', error);
+                }
+              }
+              // Force a re-render by updating allotments state
+              setAllotments(prev => [...prev]);
             }}
           >
             <option value="">Select Receipt Book</option>
@@ -171,11 +210,20 @@ const DieselEditAllotment = () => {
           </select>
         </td>
         <td>
-          <select defaultValue={detail.receipt_number || ""}>
+          <select 
+            value={detail.receipt_number || ""}
+            onChange={(e) => {
+              const receiptNumber = e.target.value;
+              // Update the detail object with new receipt_number
+              detail.receipt_number = receiptNumber;
+              // Force a re-render by updating allotments state
+              setAllotments(prev => [...prev]);
+            }}
+          >
             <option value="">Select Receipt No</option>
             {receiptNumbers[detail.receipt_book_id]?.map(number => (
               <option key={number.value} value={number.value}>
-                {number.label}
+                {number.value}
               </option>
             ))}
           </select>
