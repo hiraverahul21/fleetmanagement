@@ -1392,6 +1392,56 @@ app.get('/api/diesel-allotments/details', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// Add the update endpoint for diesel allotments
+app.put('/api/diesel-allotments/update', async (req, res) => {
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    const { allotments } = req.body;
+
+    for (const allotment of allotments) {
+      if (allotment.details && allotment.details.length > 0) {
+        for (const detail of allotment.details) {
+          await connection.query(
+            `UPDATE diesel_allotment_details 
+             SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?
+             WHERE id = ?`,
+            [detail.vendor_id, detail.receipt_book_id, detail.receipt_number, detail.id]
+          );
+
+          // Update receipt balance if receipt number is used
+          if (detail.receipt_book_id && detail.receipt_number) {
+            await connection.query(
+              `UPDATE diesel_receipts 
+               SET receipts_balance = receipts_balance - 1 
+               WHERE receipt_book_id = ? AND receipts_balance > 0`,
+              [detail.receipt_book_id]
+            );
+          }
+        }
+      }
+    }
+
+    await connection.commit();
+    res.json({ success: true, message: 'Allotment details updated successfully' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Error updating allotment details:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update allotment details',
+      error: error.message 
+    });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
+});
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
