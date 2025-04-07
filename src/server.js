@@ -1185,6 +1185,8 @@ app.get('/api/diesel-receipts/:vendorId', async (req, res) => {
 app.get('/api/diesel-receipts/:receiptBookId/numbers', async (req, res) => {
   try {
     const { receiptBookId } = req.params;
+    const { currentReceiptNumber } = req.query;
+    
     const [receipt] = await db.query(`
       SELECT receipt_from, receipt_to 
       FROM diesel_receipts 
@@ -1195,14 +1197,29 @@ app.get('/api/diesel-receipts/:receiptBookId/numbers', async (req, res) => {
       return res.json([]);
     }
 
-    const { receipt_from, receipt_to } = receipt[0];
-    const receiptNumbers = [];
-    
-    for (let i = receipt_from; i <= receipt_to; i++) {
-      receiptNumbers.push({ value: i, label: i.toString() });
+    // Only get used numbers if we're fetching new options
+    if (!currentReceiptNumber) {
+      const [usedReceipts] = await db.query(`
+        SELECT DISTINCT receipt_number 
+        FROM diesel_allotment_details 
+        WHERE receipt_book_id = ? AND receipt_number IS NOT NULL
+      `, [receiptBookId]);
+
+      const usedNumbers = new Set(usedReceipts.map(r => r.receipt_number));
+      const { receipt_from, receipt_to } = receipt[0];
+      const availableNumbers = [];
+      
+      for (let i = receipt_from; i <= receipt_to; i++) {
+        if (!usedNumbers.has(i.toString())) {
+          availableNumbers.push({ value: i, label: i.toString() });
+        }
+      }
+      
+      res.json(availableNumbers);
+    } else {
+      // Return just the current receipt number for existing selections
+      res.json([{ value: currentReceiptNumber, label: currentReceiptNumber }]);
     }
-    
-    res.json(receiptNumbers);
   } catch (error) {
     console.error('Error fetching receipt numbers:', error);
     res.status(500).json({ error: error.message });

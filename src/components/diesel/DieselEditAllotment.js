@@ -41,9 +41,12 @@ const DieselEditAllotment = () => {
     }
   };
 
-  const fetchReceiptNumbers = async (receiptBookId) => {
+  // Update the fetchReceiptNumbers function
+  const fetchReceiptNumbers = async (receiptBookId, currentReceiptNumber = null) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`);
+      const response = await axios.get(`http://localhost:5000/api/diesel-receipts/${receiptBookId}/numbers`, {
+        params: { currentReceiptNumber }
+      });
       setReceiptNumbers(prev => ({
         ...prev,
         [receiptBookId]: response.data
@@ -219,27 +222,26 @@ const DieselEditAllotment = () => {
             ))}
           </select>
         </td>
+        {/* // Update the receipt number select in renderDetailsTableBody */}
         <td>
           <select 
             value={detail.receipt_number || ""}
             onChange={(e) => {
               const receiptNumber = e.target.value;
-              
-              if (isReceiptNumberUsed(receiptNumber, detail.vendor_id, detail.receipt_book_id, detail.id)) {
-                alert('This receipt number is already selected. Please choose a different one.');
-                return;
-              }
-              
               detail.receipt_number = receiptNumber;
               setAllotments(prev => [...prev]);
             }}
           >
             <option value="">Select Receipt No</option>
-            {receiptNumbers[detail.receipt_book_id]?.map(number => (
-              <option key={number.value} value={number.value}>
-                {number.value}
-              </option>
-            ))}
+            {detail.receipt_number ? (
+              <option value={detail.receipt_number}>{detail.receipt_number}</option>
+            ) : (
+              receiptNumbers[detail.receipt_book_id]?.map(number => (
+                <option key={number.value} value={number.value}>
+                  {number.value}
+                </option>
+              ))
+            )}
           </select>
         </td>
         <td>{new Date(detail.date).toLocaleDateString()}</td>
