@@ -134,6 +134,19 @@ const DieselEditAllotment = () => {
   </thead>
   
   // Update the renderDetailsTableBody function
+  // Add this function before the renderDetailsTableBody function definition
+  const isReceiptNumberUsed = (receiptNumber, vendorId, bookId, currentDetailId) => {
+    return allotments.some(allotment => 
+      allotment.details?.some(detail => 
+        detail.receipt_number === receiptNumber &&
+        detail.vendor_id === vendorId &&
+        detail.receipt_book_id === bookId &&
+        detail.id !== currentDetailId
+      )
+    );
+  };
+  
+  // In the renderDetailsTableBody function, update the receipt number select
   const renderDetailsTableBody = (allotment) => {
     return allotment.details?.map((detail, index) => (
       <tr key={index}>
@@ -214,9 +227,13 @@ const DieselEditAllotment = () => {
             value={detail.receipt_number || ""}
             onChange={(e) => {
               const receiptNumber = e.target.value;
-              // Update the detail object with new receipt_number
+              
+              if (isReceiptNumberUsed(receiptNumber, detail.vendor_id, detail.receipt_book_id, detail.id)) {
+                alert('This receipt number is already selected. Please choose a different one.');
+                return;
+              }
+              
               detail.receipt_number = receiptNumber;
-              // Force a re-render by updating allotments state
               setAllotments(prev => [...prev]);
             }}
           >
