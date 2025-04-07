@@ -133,20 +133,17 @@ const DieselEditAllotment = () => {
     </tr>
   </thead>
   
-  // Update the renderDetailsTableBody function
-  // Add this function before the renderDetailsTableBody function definition
-  const isReceiptNumberUsed = (receiptNumber, vendorId, bookId, currentDetailId) => {
+  // First, define the isReceiptNumberUsed function
+  const isReceiptNumberUsed = (receiptNumber, currentDetailId) => {
     return allotments.some(allotment => 
       allotment.details?.some(detail => 
         detail.receipt_number === receiptNumber &&
-        detail.vendor_id === vendorId &&
-        detail.receipt_book_id === bookId &&
         detail.id !== currentDetailId
       )
     );
   };
   
-  // In the renderDetailsTableBody function, update the receipt number select
+  // Update the renderDetailsTableBody function
   const renderDetailsTableBody = (allotment) => {
     return allotment.details?.map((detail, index) => (
       <tr key={index}>
