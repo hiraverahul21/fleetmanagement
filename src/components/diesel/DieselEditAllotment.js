@@ -282,11 +282,34 @@ const DieselEditAllotment = () => {
 
   const handleUpdateAllotment = async () => {
     try {
-      // TODO: Implement update logic
-      console.log('Update allotment clicked');
+      // Prepare the data for update
+      const updatedAllotments = allotments.map(allotment => ({
+        id: allotment.id,
+        details: allotment.details?.map(detail => ({
+          id: detail.id,
+          vendor_id: detail.vendor_id,
+          receipt_book_id: detail.receipt_book_id,
+          receipt_number: detail.receipt_number
+        }))
+      }));
+  
+      // Send update request to the server
+      const response = await axios.put('http://localhost:5000/api/diesel-allotments/update', {
+        allotments: updatedAllotments,
+        year: selectedYear,
+        month: selectedMonth + 1
+      });
+  
+      if (response.data.success) {
+        alert('Allotments updated successfully');
+        // Refresh the data
+        await fetchAllotments();
+      } else {
+        alert('Failed to update allotments');
+      }
     } catch (error) {
       console.error('Error updating allotment:', error);
-      alert('Failed to update allotment');
+      alert('Failed to update allotment: ' + (error.response?.data?.message || error.message));
     }
   };
 
