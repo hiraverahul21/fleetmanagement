@@ -72,7 +72,8 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'diesel-vendors', label: 'Diesel Vendor', icon: 'store' },
         { id: 'diesel-receipts', label: 'Diesel Receipts', icon: 'receipt' },
         { id: 'diesel-allotment', label: 'Diesel Allotment', icon: 'fill-drip' },
-        { id: 'diesel-edit-allotment', label: 'Edit Diesel Allotment', icon: 'edit', path: '/dashboard/diesel/edit-allotment' }
+        { id: 'diesel-edit-allotment', label: 'Edit Diesel Allotment', icon: 'edit', path: '/dashboard/diesel/edit-allotment' },
+        { id: 'diesel-reconciliation', label: 'Diesel Reconciliation', icon: 'balance-scale', path: '/dashboard/diesel/reconciliation' }
       ]
     },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
@@ -131,6 +132,8 @@ const Navigation = ({ onMenuSelect }) => {
         navigate('/dashboard/diesel/allotment');
       } else if (submenuItem.path === '/dashboard/diesel/edit-allotment') {
         navigate('/dashboard/diesel/edit-allotment');
+      } else if (submenuItem.path === '/dashboard/diesel/reconciliation') {
+        navigate('/dashboard/diesel/reconciliation');
       }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);
