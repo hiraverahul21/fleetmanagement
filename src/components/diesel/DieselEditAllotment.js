@@ -294,9 +294,10 @@ const DieselEditAllotment = () => {
           {detail.id === null ? (
             <input
               type="date"
-              value={detail.date}
+              value={detail.receipt_date || ''}
               onChange={(e) => {
-                detail.date = e.target.value;
+                detail.receipt_date = e.target.value;
+                detail.date = e.target.value; // Update both date fields
                 setAllotments(prev => [...prev]);
               }}
               style={{
@@ -306,7 +307,7 @@ const DieselEditAllotment = () => {
               }}
             />
           ) : (
-            new Date(detail.date).toLocaleDateString()
+            detail.date ? new Date(detail.date).toLocaleDateString() : ''
           )}
         </td>
         <td>
@@ -375,7 +376,7 @@ const DieselEditAllotment = () => {
           vendor_id: detail.vendor_id,
           receipt_book_id: detail.receipt_book_id,
           receipt_number: detail.receipt_number,
-          date: detail.date,                    // Add Receipt Date
+          date: detail.receipt_date || detail.date, // Use receipt_date with fallback
           diesel_qty: parseFloat(detail.diesel_qty) || 0  // Add Diesel Qty
         }))
       }));
@@ -519,7 +520,8 @@ const DieselEditAllotment = () => {
                               details: [...(a.details || []), {
                                 id: null,
                                 allotment_id: a.id,
-                                date: new Date().toISOString().split('T')[0],
+                                receipt_date: '',
+                                date: '',
                                 vendor_id: null,
                                 receipt_book_id: null,
                                 receipt_number: null,

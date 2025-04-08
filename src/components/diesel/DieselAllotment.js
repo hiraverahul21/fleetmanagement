@@ -260,7 +260,7 @@ const handleMonthChange = async (e) => {
             Math.round(allotment.monthly_kms / allotment.vehicle_average),
             weeklyDates.length
           ),
-          status: 'active'
+          status: 'Auto'
         }));
   
         // Calculate diesel_require value

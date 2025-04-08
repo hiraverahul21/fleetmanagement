@@ -1422,25 +1422,18 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
       if (allotment.details && allotment.details.length > 0) {
         for (const detail of allotment.details) {
           if (detail.id === null) {
-            // Set default date to current date if not provided
-            const currentDate = new Date().toISOString().split('T')[0];
-            const detailDate = detail.date || currentDate;
-            // Ensure diesel_qty is properly handled
-            const dieselQty = detail.diesel_qty !== undefined && detail.diesel_qty !== '' 
-              ? parseFloat(detail.diesel_qty) 
-              : 0;
-            // Handle new subrow insertion with proper date and diesel_qty handling
+            // Insert new detail with proper date handling
             const [result] = await connection.query(
               `INSERT INTO diesel_allotment_details 
               (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status)
               VALUES (?, ?, ?, ?, ?, ?, ?)`,
               [
                 allotment.id,
-                detail.receipt_date || new Date().toISOString().split('T')[0],
+                detail.date || null, // Use date directly without fallback
                 detail.vendor_id || null,
                 detail.receipt_book_id || null,
                 detail.receipt_number || null,
-                detail.diesel_qty ? parseFloat(detail.diesel_qty) : 0, // Convert to float and default to 0
+                detail.diesel_qty ? parseFloat(detail.diesel_qty) : 0,
                 'extra'
               ]
             );
@@ -1451,16 +1444,22 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
                 `UPDATE diesel_receipts 
                 SET receipts_balance = receipts_balance - 1
                 WHERE receipt_book_id = ? AND receipts_balance > 0`,
-                [detail.receipt_number, detail.receipt_book_id]
+                [detail.receipt_book_id]
               );
             }
           } else {
             // Update existing detail
             await connection.query(
               `UPDATE diesel_allotment_details 
-              SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?
+              SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?, date = ?
               WHERE id = ?`,
-              [detail.vendor_id, detail.receipt_book_id, detail.receipt_number, detail.id]
+              [
+                detail.vendor_id,
+                detail.receipt_book_id,
+                detail.receipt_number,
+                detail.date || null, // Add date to update query
+                detail.id
+              ]
             );
           }
         }
