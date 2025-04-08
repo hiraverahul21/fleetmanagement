@@ -1489,6 +1489,74 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
     }
   }
 });
+//  FIle uplaod and conversion
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const pdfParse = require('pdf-parse');
+const XLSX = require('xlsx');
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/api/diesel/convert-pdf', upload.single('pdfFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Read PDF file
+    const dataBuffer = fs.readFileSync(req.file.path);
+    const pdfData = await pdfParse(dataBuffer);
+
+    // Convert PDF text to rows
+    const lines = pdfData.text.split('\n').filter(line => line.trim());
+    
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Content'], // Header
+      ...lines.map(line => [line]) // Data rows
+    ]);
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Converted PDF');
+
+    // Generate Excel file
+    const excelFileName = path.join(__dirname, 'uploads', 'converted.xlsx');
+    XLSX.writeFile(wb, excelFileName);
+
+    // Send the file
+    res.download(excelFileName, 'converted.xlsx', (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+      }
+      // Clean up files
+      fs.unlinkSync(req.file.path);
+      fs.unlinkSync(excelFileName);
+    });
+
+  } catch (error) {
+    console.error('Error converting PDF:', error);
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    res.status(500).json({ error: 'Error converting PDF to Excel' });
+  }
+});
+
+// ... rest of your code ...
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
