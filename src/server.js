@@ -1490,12 +1490,14 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
   }
 });
 //  FIle uplaod and conversion
+// Add these at the top of your file with other requires
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const pdfParse = require('pdf-parse');
 const XLSX = require('xlsx');
+const PDFParser = require('pdf2table');
 
+// Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(__dirname, 'uploads');
@@ -1509,35 +1511,52 @@ const storage = multer.diskStorage({
   }
 });
 
+// Initialize multer upload middleware
 const upload = multer({ storage: storage });
 
+// PDF to Excel conversion endpoint
 app.post('/api/diesel/convert-pdf', upload.single('pdfFile'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Read PDF file
-    const dataBuffer = fs.readFileSync(req.file.path);
-    const pdfData = await pdfParse(dataBuffer);
-
-    // Convert PDF text to rows
-    const lines = pdfData.text.split('\n').filter(line => line.trim());
+    const pdfBuffer = fs.readFileSync(req.file.path);
     
-    // Create workbook and worksheet
+    // Convert PDF to table data
+    const tables = await new Promise((resolve, reject) => {
+      PDFParser.parse(pdfBuffer, (err, data) => {
+        if (err) reject(err);
+        else {
+          // Ensure data is in the correct format (array of arrays)
+          const formattedData = Array.isArray(data) ? data.map(row => {
+            return Array.isArray(row) ? row : [row];
+          }) : [[data]];
+          resolve([formattedData]); // Wrap in array to handle as multiple tables
+        }
+      });
+    });
+
+    // Create workbook
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([
-      ['Content'], // Header
-      ...lines.map(line => [line]) // Data rows
-    ]);
+    
+    // Add each table as a worksheet
+    tables.forEach((table, index) => {
+      if (table && Array.isArray(table) && table.length > 0) {
+        // Ensure each row is an array
+        const formattedTable = table.map(row => 
+          Array.isArray(row) ? row : [row]
+        );
+        const ws = XLSX.utils.aoa_to_sheet(formattedTable);
+        XLSX.utils.book_append_sheet(wb, ws, `Table_${index + 1}`);
+      }
+    });
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Converted PDF');
-
-    // Generate Excel file
+    // Save to Excel file
     const excelFileName = path.join(__dirname, 'uploads', 'converted.xlsx');
     XLSX.writeFile(wb, excelFileName);
 
-    // Send the file
+    // Send file to client
     res.download(excelFileName, 'converted.xlsx', (err) => {
       if (err) {
         console.error('Error sending file:', err);
@@ -1555,8 +1574,6 @@ app.post('/api/diesel/convert-pdf', upload.single('pdfFile'), async (req, res) =
     res.status(500).json({ error: 'Error converting PDF to Excel' });
   }
 });
-
-// ... rest of your code ...
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
