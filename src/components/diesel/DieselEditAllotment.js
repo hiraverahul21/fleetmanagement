@@ -258,6 +258,22 @@ const DieselEditAllotment = () => {
             value={detail.receipt_number || ""}
             onChange={(e) => {
               const receiptNumber = e.target.value;
+              
+              // Check if this receipt number is already used in any allotment
+              const isUsed = allotments.some(allotment => 
+                allotment.details?.some(d => 
+                  d.receipt_number === receiptNumber && 
+                  d !== detail && // Changed this line to compare entire detail object
+                  d.receipt_book_id === detail.receipt_book_id
+                )
+              );
+  
+              if (isUsed) {
+                window.alert('This receipt number is already in use. Please select a different one.');
+                e.target.value = detail.receipt_number || ''; // Reset the select value
+                return;
+              }
+  
               detail.receipt_number = receiptNumber;
               setAllotments(prev => [...prev]);
             }}
