@@ -332,6 +332,27 @@ const DieselEditAllotment = () => {
         </td>
         <td>{detail.status}</td>
         <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
+        <td>
+          {detail.id === null ? (
+            <input
+              type="text"
+              value={detail.remarks || ''}
+              onChange={(e) => {
+                detail.remarks = e.target.value;
+                setAllotments(prev => [...prev]);
+              }}
+              placeholder="Enter remarks"
+              style={{
+                width: '150px',
+                padding: '4px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          ) : (
+            detail.remarks || ''
+          )}
+        </td>
       </tr>
     ));
   };
@@ -368,7 +389,6 @@ const DieselEditAllotment = () => {
 
   const handleUpdateAllotment = async () => {
     try {
-      // Prepare the data for update
       const updatedAllotments = allotments.map(allotment => ({
         id: allotment.id,
         details: allotment.details?.map(detail => ({
@@ -376,12 +396,13 @@ const DieselEditAllotment = () => {
           vendor_id: detail.vendor_id,
           receipt_book_id: detail.receipt_book_id,
           receipt_number: detail.receipt_number,
-          date: detail.receipt_date || detail.date, // Use receipt_date with fallback
-          diesel_qty: parseFloat(detail.diesel_qty) || 0  // Add Diesel Qty
+          date: detail.receipt_date || detail.date,
+          diesel_qty: parseFloat(detail.diesel_qty) || 0,
+          status: detail.status || 'extra',
+          remarks: detail.remarks || ''  // Ensure remarks is included
         }))
       }));
 
-      // Send update request to the server
       const response = await axios.put('http://localhost:5000/api/diesel-allotments/update', {
         allotments: updatedAllotments,
         year: selectedYear,
@@ -530,7 +551,8 @@ const DieselEditAllotment = () => {
                                 receipt_book_id: null,
                                 receipt_number: null,
                                 diesel_qty: 0,
-                                status: 'active'
+                                status: 'extra',
+                                remarks: '' // Add remarks field
                               }]
                             };
                           }
@@ -567,6 +589,7 @@ const DieselEditAllotment = () => {
                             <th>Diesel Qty</th>
                             <th>Status</th>
                             <th>Month</th>
+                            <th>Remarks</th>
                           </tr>
                         </thead>
                         <tbody>

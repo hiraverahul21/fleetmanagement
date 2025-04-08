@@ -1425,8 +1425,8 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
             // Insert new detail with proper date handling
             const [result] = await connection.query(
               `INSERT INTO diesel_allotment_details 
-              (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status)
-              VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status,remarks)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 allotment.id,
                 detail.date || null, // Use date directly without fallback
@@ -1434,7 +1434,8 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
                 detail.receipt_book_id || null,
                 detail.receipt_number || null,
                 detail.diesel_qty ? parseFloat(detail.diesel_qty) : 0,
-                'extra'
+                detail.status || 'extra',
+                detail.remarks || null
               ]
             );
 
@@ -1451,13 +1452,17 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
             // Update existing detail
             await connection.query(
               `UPDATE diesel_allotment_details 
-              SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?, date = ?
+              SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?, 
+                  date = ?, diesel_qty = ?, status = ?, remarks = ?
               WHERE id = ?`,
               [
-                detail.vendor_id,
-                detail.receipt_book_id,
-                detail.receipt_number,
-                detail.date || null, // Add date to update query
+                detail.vendor_id || null,
+                detail.receipt_book_id || null,
+                detail.receipt_number || null,
+                detail.date || null,
+                detail.diesel_qty || 0,
+                detail.status || 'extra',
+                detail.remarks || null,
                 detail.id
               ]
             );
