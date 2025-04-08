@@ -1421,20 +1421,46 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
     for (const allotment of allotments) {
       if (allotment.details && allotment.details.length > 0) {
         for (const detail of allotment.details) {
-          await connection.query(
-            `UPDATE diesel_allotment_details 
-             SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?
-             WHERE id = ?`,
-            [detail.vendor_id, detail.receipt_book_id, detail.receipt_number, detail.id]
-          );
+          if (detail.id === null) {
+            // Set default date to current date if not provided
+            const currentDate = new Date().toISOString().split('T')[0];
+            const detailDate = detail.date || currentDate;
+            // Ensure diesel_qty is properly handled
+            const dieselQty = detail.diesel_qty !== undefined && detail.diesel_qty !== '' 
+              ? parseFloat(detail.diesel_qty) 
+              : 0;
+            // Handle new subrow insertion with proper date and diesel_qty handling
+            const [result] = await connection.query(
+              `INSERT INTO diesel_allotment_details 
+              (allotment_id, date, vendor_id, receipt_book_id, receipt_number, diesel_qty, status)
+              VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              [
+                allotment.id,
+                detailDate,
+                detail.vendor_id || null,
+                detail.receipt_book_id || null,
+                detail.receipt_number || null,
+                parseFloat(detail.diesel_qty) || 0, // Convert to float and default to 0
+                'extra'
+              ]
+            );
 
-          // Update receipt balance if receipt number is used
-          if (detail.receipt_book_id && detail.receipt_number) {
+            // Update receipt balance for new entries
+            if (detail.receipt_book_id && detail.receipt_number) {
+              await connection.query(
+                `UPDATE diesel_receipts 
+                SET receipts_balance = receipts_balance - 1
+                WHERE receipt_book_id = ? AND receipts_balance > 0`,
+                [detail.receipt_number, detail.receipt_book_id]
+              );
+            }
+          } else {
+            // Update existing detail
             await connection.query(
-              `UPDATE diesel_receipts 
-               SET receipts_balance = receipts_balance - 1 
-               WHERE receipt_book_id = ? AND receipts_balance > 0`,
-              [detail.receipt_book_id]
+              `UPDATE diesel_allotment_details 
+              SET vendor_id = ?, receipt_book_id = ?, receipt_number = ?
+              WHERE id = ?`,
+              [detail.vendor_id, detail.receipt_book_id, detail.receipt_number, detail.id]
             );
           }
         }
