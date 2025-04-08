@@ -146,11 +146,41 @@ const DieselEditAllotment = () => {
     );
   };
   
-  // Update the renderDetailsTableBody function
+  // Update the renderDetailsTableBody function to include delete button for new rows
   const renderDetailsTableBody = (allotment) => {
     return allotment.details?.map((detail, index) => (
       <tr key={index}>
-        <td>{allotment.id}</td>
+        <td>
+          {allotment.id}
+          {detail.id === null && (
+            <button
+              onClick={() => {
+                const updatedAllotments = allotments.map(a => {
+                  if (a.id === allotment.id) {
+                    return {
+                      ...a,
+                      details: a.details.filter((d, i) => i !== index)
+                    };
+                  }
+                  return a;
+                });
+                setAllotments(updatedAllotments);
+              }}
+              style={{
+                backgroundColor: '#ff4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '2px 6px',
+                marginLeft: '8px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+        </td>
         <td>
           <select 
             value={detail.vendor_id || ""}
