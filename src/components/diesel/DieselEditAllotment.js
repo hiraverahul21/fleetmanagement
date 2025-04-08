@@ -149,7 +149,7 @@ const DieselEditAllotment = () => {
   // Update the renderDetailsTableBody function to include delete button for new rows
   const renderDetailsTableBody = (allotment) => {
     return allotment.details?.map((detail, index) => (
-      <tr key={index}>
+      <tr key={index} style={{ color: detail.status === 'extra' ? '#ff4444' : 'inherit' }}>
         <td>
           {allotment.id}
           {detail.id === null && (
@@ -484,7 +484,11 @@ const DieselEditAllotment = () => {
           <tbody>
             {allotments.map((allotment) => (
               <React.Fragment key={allotment.id}>
-                <tr>
+                <tr style={{ 
+                  backgroundColor: allotment.details?.some(detail => detail.status === 'extra') 
+                    ? '#ffebee' 
+                    : 'inherit' 
+                }}>
                   <td>
                     <button className="expand-btn" onClick={() => toggleRow(allotment.id)}>
                       {expandedRows.has(allotment.id) ? '-' : '+'}
