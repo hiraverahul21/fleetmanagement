@@ -244,8 +244,45 @@ const DieselEditAllotment = () => {
             )}
           </select>
         </td>
-        <td>{new Date(detail.date).toLocaleDateString()}</td>
-        <td>{detail.diesel_qty}</td>
+        <td>
+          {detail.id === null ? (
+            <input
+              type="date"
+              value={detail.date}
+              onChange={(e) => {
+                detail.date = e.target.value;
+                setAllotments(prev => [...prev]);
+              }}
+              style={{
+                padding: '4px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          ) : (
+            new Date(detail.date).toLocaleDateString()
+          )}
+        </td>
+        <td>
+          {detail.id === null ? (
+            <input
+              type="number"
+              value={detail.diesel_qty || ''}
+              onChange={(e) => {
+                detail.diesel_qty = parseFloat(e.target.value) || 0;
+                setAllotments(prev => [...prev]);
+              }}
+              style={{
+                width: '80px',
+                padding: '4px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+          ) : (
+            detail.diesel_qty
+          )}
+        </td>
         <td>{detail.status}</td>
         <td>{getMonthLabel(allotment.year, allotment.month - 1)}</td>
       </tr>
@@ -424,6 +461,42 @@ const DieselEditAllotment = () => {
                     </button>
                     <button className="delete-btn">
                       <i className="fas fa-trash"></i>
+                    </button>
+                    <button 
+                      className="add-entry-btn"
+                      onClick={() => {
+                        const updatedAllotments = allotments.map(a => {
+                          if (a.id === allotment.id) {
+                            return {
+                              ...a,
+                              details: [...(a.details || []), {
+                                id: null,
+                                allotment_id: a.id,
+                                date: new Date().toISOString().split('T')[0],
+                                vendor_id: null,
+                                receipt_book_id: null,
+                                receipt_number: null,
+                                diesel_qty: 0,
+                                status: 'active'
+                              }]
+                            };
+                          }
+                          return a;
+                        });
+                        setAllotments(updatedAllotments);
+                        setExpandedRows(prev => new Set([...prev, allotment.id]));
+                      }}
+                      style={{
+                        backgroundColor: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '5px 10px',
+                        marginLeft: '5px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <i className="fas fa-plus"></i>
                     </button>
                   </td>
                 </tr>
