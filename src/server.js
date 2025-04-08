@@ -1436,11 +1436,11 @@ app.put('/api/diesel-allotments/update', async (req, res) => {
               VALUES (?, ?, ?, ?, ?, ?, ?)`,
               [
                 allotment.id,
-                detailDate,
+                detail.receipt_date || new Date().toISOString().split('T')[0],
                 detail.vendor_id || null,
                 detail.receipt_book_id || null,
                 detail.receipt_number || null,
-                parseFloat(detail.diesel_qty) || 0, // Convert to float and default to 0
+                detail.diesel_qty ? parseFloat(detail.diesel_qty) : 0, // Convert to float and default to 0
                 'extra'
               ]
             );

@@ -374,20 +374,21 @@ const DieselEditAllotment = () => {
           id: detail.id,
           vendor_id: detail.vendor_id,
           receipt_book_id: detail.receipt_book_id,
-          receipt_number: detail.receipt_number
+          receipt_number: detail.receipt_number,
+          date: detail.date,                    // Add Receipt Date
+          diesel_qty: parseFloat(detail.diesel_qty) || 0  // Add Diesel Qty
         }))
       }));
-  
+
       // Send update request to the server
       const response = await axios.put('http://localhost:5000/api/diesel-allotments/update', {
         allotments: updatedAllotments,
         year: selectedYear,
         month: selectedMonth + 1
       });
-  
+
       if (response.data.success) {
         alert('Allotments updated successfully');
-        // Refresh the data
         await fetchAllotments();
       } else {
         alert('Failed to update allotments');
