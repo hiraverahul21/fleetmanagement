@@ -17,7 +17,6 @@ const UploadBill = () => {
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       
-      // Get vendor name from A1 cell
       const vendorCell = firstSheet['A1'];
       const vendorNameValue = vendorCell ? vendorCell.v : '';
       setVendorName(vendorNameValue);
@@ -28,25 +27,35 @@ const UploadBill = () => {
         blankrows: false
       });
 
-      if (jsonData.length > 1) { // Check for at least 2 rows
-        // Create columns using second row (index 1) as headers
+      if (jsonData.length > 1) {
+        // Calculate max width for each column
+        const columnWidths = new Array(jsonData[1].length).fill(0);
+        jsonData.slice(2).forEach(row => {
+          row.forEach((cell, index) => {
+            const cellLength = String(cell).length * 8; // Approximate pixel width
+            columnWidths[index] = Math.max(columnWidths[index], cellLength);
+          });
+        });
+
+        // Create columns with calculated widths
         const tableColumns = [
           {
             title: 'Vendor Name',
             dataIndex: 'vendorName',
             key: 'vendorName',
             fixed: 'left',
-            width: 150
+            width: Math.max(150, vendorNameValue.length * 8)
           },
           ...jsonData[1].map((col, index) => ({
             title: col || `Column ${index + 1}`,
             dataIndex: `col${index}`,
             key: `col${index}`,
+            width: Math.max(100, columnWidths[index], String(col).length * 8)
           }))
         ];
         setColumns(tableColumns);
 
-        // Start data from third row (index 2)
+        // Rest of the data processing remains the same
         const tableData = jsonData.slice(2).map((row, rowIndex) => {
           const rowData = { 
             key: rowIndex,
