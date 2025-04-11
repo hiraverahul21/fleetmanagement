@@ -73,8 +73,8 @@ const Navigation = ({ onMenuSelect }) => {
         { id: 'diesel-receipts', label: 'Diesel Receipts', icon: 'receipt' },
         { id: 'diesel-allotment', label: 'Diesel Allotment', icon: 'fill-drip' },
         { id: 'diesel-edit-allotment', label: 'Edit Diesel Allotment', icon: 'edit', path: '/dashboard/diesel/edit-allotment' },
-        { id: 'upload-diesel-bill', label: 'Upload Diesel Bill', icon: 'upload', path: '/dashboard/diesel/upload-bill' },
-        { id: 'diesel-reconciliation', label: 'Diesel Reconciliation', icon: 'balance-scale', path: '/dashboard/diesel/reconciliation' }
+        { id: 'diesel-reconciliation', label: 'Diesel Reconciliation', icon: 'balance-scale', path: '/dashboard/diesel/reconciliation' },
+        { id: 'upload-bill', label: 'Upload Bill', icon: 'file-upload', path: '/dashboard/diesel/upload' }
       ]
     },
     { id: 'equipment', icon: 'tools', label: 'Equipment' },
@@ -133,10 +133,10 @@ const Navigation = ({ onMenuSelect }) => {
         navigate('/dashboard/diesel/allotment');
       } else if (submenuItem.path === '/dashboard/diesel/edit-allotment') {
         navigate('/dashboard/diesel/edit-allotment');
-      } else if (submenuItem.path === '/dashboard/diesel/upload-bill') {
-        navigate('/dashboard/diesel/upload-bill');
       } else if (submenuItem.path === '/dashboard/diesel/reconciliation') {
         navigate('/dashboard/diesel/reconciliation');
+      } else if (submenuItem.path === '/dashboard/diesel/upload') {
+        navigate('/dashboard/diesel/upload');
       }
     }
     onMenuSelect({ ...submenuItem, parentId: parentItem.id }, true);

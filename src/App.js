@@ -18,6 +18,7 @@ import DieselReceipts from './components/diesel/DieselReceipts';
 import DieselAllotment from './components/diesel/DieselAllotment';
 import DieselEditAllotment from './components/diesel/DieselEditAllotment';
 import DieselReconciliation from './components/diesel/DieselReconciliation';
+import UploadBill from './components/diesel/UploadBill';
 import React, { useState } from 'react';
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
             <Route path="diesel/allotment" element={<DieselAllotment />} />
             <Route path="diesel/edit-allotment" element={<DieselEditAllotment />} /> {/* Fixed path */}
             <Route path="/dashboard/diesel/reconciliation" element={<DieselReconciliation />} />
+            <Route path="/dashboard/diesel/upload" element={<UploadBill />} />
           </Route>
         </Routes>
       </div>
