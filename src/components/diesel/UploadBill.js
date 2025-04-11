@@ -51,21 +51,93 @@ const UploadBill = () => {
             dataIndex: `col${index}`,
             key: `col${index}`,
             width: Math.max(100, columnWidths[index], String(col).length * 8)
-          }))
+          })),
+          {
+            title: 'Slip Given To',
+            dataIndex: 'slipGivenTo',
+            key: 'slipGivenTo',
+            width: 150,
+            render: (text, record) => (
+              <input
+                type="text"
+                value={text || ''}
+                onChange={(e) => handleInputChange(record.key, 'slipGivenTo', e.target.value)}
+                style={{ width: '100%' }}
+              />
+            )
+          },
+          {
+            title: 'Qty Taken',
+            dataIndex: 'qtyTaken',
+            key: 'qtyTaken',
+            width: 100,
+            render: (text, record) => (
+              <input
+                type="number"
+                value={text || ''}
+                onChange={(e) => handleInputChange(record.key, 'qtyTaken', e.target.value)}
+                style={{ width: '100%' }}
+              />
+            )
+          },
+          {
+            title: 'Reco Status',
+            dataIndex: 'recoStatus',
+            key: 'recoStatus',
+            width: 120,
+            render: (text, record) => (
+              <input
+                type="text"
+                value={text || ''}
+                onChange={(e) => handleInputChange(record.key, 'recoStatus', e.target.value)}
+                style={{ width: '100%' }}
+              />
+            )
+          },
+          {
+            title: 'Remarks',
+            dataIndex: 'remarks',
+            key: 'remarks',
+            width: 200,
+            render: (text, record) => (
+              <input
+                type="text"
+                value={text || ''}
+                onChange={(e) => handleInputChange(record.key, 'remarks', e.target.value)}
+                style={{ width: '100%' }}
+              />
+            )
+          }
         ];
-        setColumns(tableColumns);
 
-        // Rest of the data processing remains the same
+        // Update tableData to include new fields
         const tableData = jsonData.slice(2).map((row, rowIndex) => {
           const rowData = { 
             key: rowIndex,
-            vendorName: vendorNameValue
+            vendorName: vendorNameValue,
+            slipGivenTo: '',
+            qtyTaken: '',
+            recoStatus: '',
+            remarks: ''
           };
           row.forEach((cell, cellIndex) => {
             rowData[`col${cellIndex}`] = cell;
           });
           return rowData;
         });
+
+  // Add handler function for input changes
+  const handleInputChange = (key, field, value) => {
+    setExcelData(prev => 
+      prev.map(row => 
+        row.key === key ? { ...row, [field]: value } : row
+      )
+    );
+  };
+        setColumns(tableColumns);
+
+        // Rest of the data processing remains the same
+        
         setExcelData(tableData);
       }
     };
