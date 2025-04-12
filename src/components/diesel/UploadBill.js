@@ -36,23 +36,41 @@ const UploadBill = () => {
 
   const processExcelRow = async (row, columnIndex) => {
     const slipValue = row[columnIndex];
+    const qtyFromBill = parseFloat(row[columnIndex + 1] || 0); // Assuming Qty is in next column
     console.log('Processing slip value:', slipValue, 'at column:', columnIndex);
     if (slipValue) {
       const dieselDetails = await fetchDieselDetails(slipValue);
       if (dieselDetails) {
+        const qtyTaken = parseFloat(dieselDetails.qtyTaken || 0);
+        let recoStatus = '';
+        let statusStyle = {};
+
+        if (qtyFromBill > qtyTaken) {
+          recoStatus = 'Qty Issued Exceed';
+          statusStyle = { color: 'red' };
+        } else if (qtyFromBill < qtyTaken) {
+          recoStatus = 'Qty Issued Less';
+          statusStyle = { color: 'green' };
+        } else {
+          recoStatus = 'Success';
+          statusStyle = { fontWeight: 'bold' };
+        }
+
         return {
           slipGivenTo: dieselDetails.vehicleNo,
           qtyTaken: dieselDetails.qtyTaken,
-          recoStatus: 'Success'
+          recoStatus,
+          statusStyle
         };
       }
       return {
         slipGivenTo: 'Not Found',
         qtyTaken: 'Not Found',
-        recoStatus: 'Fail'
+        recoStatus: 'Fail',
+        statusStyle: { color: 'red' }
       };
     }
-    return { slipGivenTo: '', qtyTaken: '', recoStatus: '' };
+    return { slipGivenTo: '', qtyTaken: '', recoStatus: '', statusStyle: {} };
   };
 
   const handleFile = (file) => {
@@ -131,12 +149,9 @@ const UploadBill = () => {
             key: 'recoStatus',
             width: 120,
             render: (text, record) => (
-              <input
-                type="text"
-                value={text || ''}
-                onChange={(e) => handleInputChange(record.key, 'recoStatus', e.target.value)}
-                style={{ width: '100%' }}
-              />
+              <span style={record.statusStyle}>
+                {text || ''}
+              </span>
             )
           },
           {
