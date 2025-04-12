@@ -36,15 +36,27 @@ const UploadBill = () => {
 
   const processExcelRow = async (row, columnIndex) => {
     const slipValue = row[columnIndex];
-    const qtyFromBill = parseFloat(row[columnIndex + 1] || 0); // Assuming Qty is in next column
-    console.log('Processing slip value:', slipValue, 'at column:', columnIndex);
+    const qtyFromBill = parseFloat(row[columnIndex + 1] || 0);
+    
+    // Find vehicle number from the row
+    const vehNoIndex = row.findIndex(cell => 
+      String(cell).toLowerCase().includes('veh')
+    );
+    const vehNoFromBill = vehNoIndex !== -1 ? String(row[vehNoIndex]) : '';
+    
+    // Extract 4 continuous digits from vehicle number
+    const vehNoDigits = vehNoFromBill.match(/\d{4}/)?.[0] || '';
+
     if (slipValue) {
       const dieselDetails = await fetchDieselDetails(slipValue);
       if (dieselDetails) {
         const qtyTaken = parseFloat(dieselDetails.qtyTaken || 0);
         let recoStatus = '';
         let statusStyle = {};
+        let remarks = '';
+        let remarkStyle = {};
 
+        // Compare quantities for reco status
         if (qtyFromBill > qtyTaken) {
           recoStatus = 'Qty Issued Exceed';
           statusStyle = { color: 'red' };
@@ -56,21 +68,47 @@ const UploadBill = () => {
           statusStyle = { fontWeight: 'bold' };
         }
 
+        // Inside processExcelRow function, update the vehicle comparison section:
+        // Compare vehicle numbers
+        const slipVehicleDigits = String(dieselDetails.vehicleNo).match(/\d{4}/)?.[0] || '';
+        console.log('Vehicle comparison:', { vehNoDigits, slipVehicleDigits }); // Add this for debugging
+        if (vehNoDigits && slipVehicleDigits) {
+          remarks = vehNoDigits === slipVehicleDigits ? 'Same Vehicle' : 'Different Vehicle';
+          remarkStyle = {
+            color: vehNoDigits === slipVehicleDigits ? 'green' : 'red',
+            fontWeight: 'bold'
+          };
+        } else {
+          remarks = 'Vehicle Number Not Found';
+          remarkStyle = { color: 'orange' };
+        }
+
         return {
           slipGivenTo: dieselDetails.vehicleNo,
           qtyTaken: dieselDetails.qtyTaken,
           recoStatus,
-          statusStyle
+          statusStyle,
+          remarks,
+          remarkStyle
         };
       }
       return {
         slipGivenTo: 'Not Found',
         qtyTaken: 'Not Found',
         recoStatus: 'Fail',
-        statusStyle: { color: 'red' }
+        statusStyle: { color: 'red' },
+        remarks: '',
+        remarkStyle: {}
       };
     }
-    return { slipGivenTo: '', qtyTaken: '', recoStatus: '', statusStyle: {} };
+    return { 
+      slipGivenTo: '', 
+      qtyTaken: '', 
+      recoStatus: '', 
+      statusStyle: {},
+      remarks: '',
+      remarkStyle: {}
+    };
   };
 
   const handleFile = (file) => {
@@ -160,12 +198,9 @@ const UploadBill = () => {
             key: 'remarks',
             width: 200,
             render: (text, record) => (
-              <input
-                type="text"
-                value={text || ''}
-                onChange={(e) => handleInputChange(record.key, 'remarks', e.target.value)}
-                style={{ width: '100%' }}
-              />
+              <span style={record.remarkStyle}>
+                {record.remarks}
+              </span>
             )
           }
         ];
@@ -181,8 +216,7 @@ const UploadBill = () => {
           const rowData = { 
             key: rowIndex,
             vendorName: vendorNameValue,
-            ...dieselInfo,
-            remarks: ''
+            ...dieselInfo
           };
           row.forEach((cell, cellIndex) => {
             rowData[`col${cellIndex}`] = cell;
