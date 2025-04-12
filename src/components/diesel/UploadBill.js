@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, message, Card, Table } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
+
+// Configure axios base URL
+axios.defaults.baseURL = 'http://localhost:5000';
 
 const { Dragger } = Upload;
 
@@ -10,9 +14,50 @@ const UploadBill = () => {
   const [columns, setColumns] = useState([]);
   const [vendorName, setVendorName] = useState('');
 
+  const fetchDieselDetails = async (slipNumber) => {
+    try {
+      console.log('Fetching details for slip:', slipNumber);
+      const response = await axios.get(`/api/diesel/slip-details/${slipNumber}`);
+      console.log('Response:', response.data);
+      if (response.data && response.data.success) {
+        return {
+          qtyTaken: response.data.data.dieselQty,
+          vehicleNo: response.data.data.vehicleNo
+        };
+      }
+      message.warning(`No details found for slip number: ${slipNumber}`);
+      return null;
+    } catch (error) {
+      console.error('Error fetching diesel details:', error);
+      message.error(`Failed to fetch details for slip: ${slipNumber}`);
+      return null;
+    }
+  };
+
+  const processExcelRow = async (row, columnIndex) => {
+    const slipValue = row[columnIndex];
+    console.log('Processing slip value:', slipValue, 'at column:', columnIndex);
+    if (slipValue) {
+      const dieselDetails = await fetchDieselDetails(slipValue);
+      if (dieselDetails) {
+        return {
+          slipGivenTo: dieselDetails.vehicleNo,
+          qtyTaken: dieselDetails.qtyTaken,
+          recoStatus: 'Success'
+        };
+      }
+      return {
+        slipGivenTo: 'Not Found',
+        qtyTaken: 'Not Found',
+        recoStatus: 'Fail'
+      };
+    }
+    return { slipGivenTo: '', qtyTaken: '', recoStatus: '' };
+  };
+
   const handleFile = (file) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const data = e.target.result;
       const workbook = XLSX.read(data, { type: 'array' });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -110,39 +155,40 @@ const UploadBill = () => {
           }
         ];
 
-        // Update tableData to include new fields
-        const tableData = jsonData.slice(2).map((row, rowIndex) => {
+        // Find the slip column index
+        const slipColumnIndex = jsonData[1].findIndex(col => 
+          col.toLowerCase().includes('slip')
+        );
+
+        // Process data with diesel details
+        const tableData = await Promise.all(jsonData.slice(2).map(async (row, rowIndex) => {
+          const dieselInfo = await processExcelRow(row, slipColumnIndex);
           const rowData = { 
             key: rowIndex,
             vendorName: vendorNameValue,
-            slipGivenTo: '',
-            qtyTaken: '',
-            recoStatus: '',
+            ...dieselInfo,
             remarks: ''
           };
           row.forEach((cell, cellIndex) => {
             rowData[`col${cellIndex}`] = cell;
           });
           return rowData;
-        });
+        }));
 
-  // Add handler function for input changes
+        setColumns(tableColumns);
+        setExcelData(tableData);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    return false;
+  };
+
   const handleInputChange = (key, field, value) => {
     setExcelData(prev => 
       prev.map(row => 
         row.key === key ? { ...row, [field]: value } : row
       )
     );
-  };
-        setColumns(tableColumns);
-
-        // Rest of the data processing remains the same
-        
-        setExcelData(tableData);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-    return false;
   };
 
   const props = {

@@ -7,7 +7,43 @@ const port = 5000;
 
 app.use(cors());
 app.use(express.json());
+// Add the slip details endpoint here
+app.get('/api/diesel/slip-details/:slipNumber', async (req, res) => {
+  try {
+    const { slipNumber } = req.params;
+    console.log('Received request for slip:', slipNumber);
+    
+    const [details] = await db.query(`
+      SELECT 
+        dad.diesel_qty,
+        da.vehicle_no,
+        dad.status,
+        dad.allotment_id
+      FROM diesel_allotment_details dad
+      JOIN diesel_allotments da ON dad.allotment_id = da.id
+      WHERE dad.receipt_number = ?
+      LIMIT 1
+    `, [slipNumber]);
 
+    console.log('Query results:', details);
+
+    res.status(200).json({
+      success: details && details.length > 0,
+      data: details && details.length > 0 ? {
+        dieselQty: details[0].diesel_qty,
+        vehicleNo: details[0].vehicle_no
+      } : null,
+      message: details && details.length > 0 ? 'Details found' : 'No details found for this slip number'
+    });
+
+  } catch (error) {
+    console.error('Error fetching slip details:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
 // Routes API endpoints
 app.get('/api/routes', async (req, res) => {
   try {
@@ -1574,6 +1610,7 @@ app.post('/api/diesel/convert-pdf', upload.single('pdfFile'), async (req, res) =
     res.status(500).json({ error: 'Error converting PDF to Excel' });
   }
 });
+
 // Move app.listen() to the end
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
